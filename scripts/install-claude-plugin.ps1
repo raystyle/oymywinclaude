@@ -11,7 +11,7 @@
 [CmdletBinding()]
 param(
     [Parameter(Position = 0)]
-    [ValidateSet("all", "typescript", "powershell", "astral", "skill-creator")]
+    [ValidateSet("all", "typescript", "powershell", "astral", "mq-lsp", "skill-creator")]
     [string]$PluginType = "all"
 )
 
@@ -194,13 +194,37 @@ if ($PluginType -eq "all" -or $PluginType -eq "skill-creator") {
     Write-Host ""
 }
 
+# ---- mq-lsp ----
+if ($PluginType -eq "all" -or $PluginType -eq "mq-lsp") {
+    Write-Host "[INFO] mq-lsp..." -ForegroundColor Cyan
+    [void](Test-Binary "mq-lsp" "mq-lsp")
+
+    # Register local marketplace + plugin
+    $marketplacePath = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot "..\marketplace"))
+    if (-not (Test-Path (Join-Path $marketplacePath ".claude-plugin\marketplace.json"))) {
+        Write-Host "[ERROR] Local marketplace not found: $marketplacePath" -ForegroundColor Red
+    }
+    else {
+        $output = & claude plugin list 2>&1
+        if ($output -notmatch "mq-lsp@local-dev") {
+            & claude plugin marketplace add $marketplacePath 2>&1 | Out-Null
+            [void](Register-Plugin "mq-lsp@local-dev")
+        }
+        else {
+            Write-Host "[OK] mq-lsp@local-dev : already registered" -ForegroundColor Green
+        }
+    }
+    Write-Host ""
+}
+
 # ---- Summary ----
 $plugins = switch ($PluginType) {
     "typescript"   { @("typescript-lsp@local-dev") }
     "powershell"   { @("powershell-lsp@local-dev") }
     "astral"       { @("astral@local-dev") }
+    "mq-lsp"       { @("mq-lsp@local-dev") }
     "skill-creator"{ @("skill-creator@local-dev") }
-    default        { @("typescript-lsp@local-dev", "powershell-lsp@local-dev", "astral@local-dev", "skill-creator@local-dev") }
+    default        { @("typescript-lsp@local-dev", "powershell-lsp@local-dev", "astral@local-dev", "mq-lsp@local-dev", "skill-creator@local-dev") }
 }
 Write-Host "[INFO] Plugin status:" -ForegroundColor Cyan
 $output = & claude plugin list 2>&1

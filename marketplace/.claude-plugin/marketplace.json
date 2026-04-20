@@ -54,6 +54,18 @@
       "source": "./plugins/skill-creator",
       "category": "development",
       "strict": false
+    },
+    {
+      "name": "mq-lsp",
+      "description": "mq language server for query language code intelligence (completion, hover, go-to-definition, diagnostics, formatting)",
+      "version": "1.0.0",
+      "author": {
+        "name": "RAY",
+        "email": "ray@devmeta.local"
+      },
+      "source": "./plugins/mq-lsp",
+      "category": "development",
+      "strict": false
     }
   ]
 }

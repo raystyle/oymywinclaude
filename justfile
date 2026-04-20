@@ -266,6 +266,11 @@ install-claude-plugin-astral:
 install-claude-plugin-skill-creator:
     @& "{{scripts}}/install-claude-plugin.ps1" skill-creator
 
+[doc('Register mq-lsp plugin (mq language server)')]
+[group('claude-plugin')]
+install-claude-plugin-mqlsp:
+    @& "{{scripts}}/install-claude-plugin.ps1" mq-lsp
+
 [doc('Register Claude Code plugin by name')]
 [group('claude-plugin')]
 install-claude-plugin *args:
@@ -492,6 +497,11 @@ uninstall-claude-plugin-astral:
 uninstall-claude-plugin-skill-creator:
     @& "{{scripts}}/uninstall-claude-plugin.ps1" skill-creator
 
+[doc('Unregister mq-lsp plugin')]
+[group('claude-plugin')]
+uninstall-claude-plugin-mqlsp:
+    @& "{{scripts}}/uninstall-claude-plugin.ps1" mq-lsp
+
 [doc('Unregister Claude Code plugin by name')]
 [group('claude-plugin')]
 uninstall-claude-plugin *args:
@@ -707,6 +717,11 @@ status-claude-plugin-powershell:
 [group('claude-plugin')]
 status-claude-plugin-astral:
     @& "{{scripts}}/check-claude-plugin.ps1" astral
+
+[doc('Show mq-lsp plugin status')]
+[group('claude-plugin')]
+status-claude-plugin-mqlsp:
+    @& "{{scripts}}/check-claude-plugin.ps1" mq-lsp
 
 # =============================================
 #  config

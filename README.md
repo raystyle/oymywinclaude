@@ -52,7 +52,7 @@ just status-base
 | 编程语言   | Rust, Python + uv, Node.js, Go                      |
 | 数据库     | DuckDB, SQLite                                      |
 | 构建工具   | VS Build Tools (MSVC)                               |
-| 语言服务   | ty (Astral), TypeScript LSP, PowerShell Editor Svc  |
+| 语言服务   | ty (Astral), TypeScript LSP, PowerShell LSP, mq-lsp |
 | 代码分析   | PSScriptAnalyzer, ruff (Astral), markdownlint       |
 | Claude Code | Git, CLI, 插件, MCP, Playwright 技能               |
 | 数据科学   | jupyter-core + jupyter-mcp (via uv)                 |
@@ -112,6 +112,7 @@ Playwright 技能 → 插件 → 市场 → Claude CLI → Git。
 | `typescript-lsp@local-dev`  | TypeScript LSP（跳转定义、引用查找、补全等） |
 | `powershell-lsp@local-dev`  | PowerShell LSP（跳转定义、引用查找、补全等） |
 | `astral@local-dev`          | Python 技能（uv, ruff, ty）+ ty LSP          |
+| `mq-lsp@local-dev`          | mq 语言服务器（补全、悬停、定义跳转等） |
 | `skill-creator@local-dev`   | 技能创建工具（创建、测试和改进 Claude 技能） |
 
 ### MCP 服务

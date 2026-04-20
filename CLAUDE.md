@@ -124,13 +124,13 @@ dot-source 时自动设置顶层变量：`$script:DevSetupRoot`
 `marketplace/plugins/<name>/.claude-plugin/plugin.json`，
 LSP 配置内联在 `lspServers` 字段中。插件类型：
 
-- **LSP 插件**: powershell-lsp, typescript-lsp, astral (含 ty LSP)
+- **LSP 插件**: powershell-lsp, typescript-lsp, astral (含 ty LSP), mq-lsp
 - **技能插件**: skill-creator（含 agents/, scripts/, references/ 子目录）
 
 `install-claude-plugin.ps1` 中的 `Register-Plugin` 函数处理插件注册和
 启用；`Enable-Plugin` 函数检查 `claude plugin list` 输出确认启用状态。
 插件管理脚本支持 `typescript`、`powershell`、`astral`、
-`skill-creator`、`all` 五种类型。
+`mq-lsp`、`skill-creator`、`all` 六种类型。
 
 ## Testing
 

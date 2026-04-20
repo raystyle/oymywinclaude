@@ -2,7 +2,7 @@
 
 <#
 .SYNOPSIS
-    Uninstall mq and mq-crawl CLI tools
+    Uninstall mq, mq-crawl and mq-lsp CLI tools
 #>
 
 [CmdletBinding()]
@@ -13,6 +13,7 @@ param()
 $binDir = "$env:USERPROFILE\.local\bin"
 $mqExePath = "$binDir\mq.exe"
 $mqCrawlExePath = "$binDir\mq-crawl.exe"
+$mqLspExePath = "$binDir\mq-lsp.exe"
 
 Write-Host ""
 Write-Host "--- Uninstalling MQ Tools ---" -ForegroundColor Cyan
@@ -40,6 +41,7 @@ function Remove-MQTool {
 
 Remove-MQTool -ToolName "mq" -ExePath $mqExePath
 Remove-MQTool -ToolName "mq-crawl" -ExePath $mqCrawlExePath
+Remove-MQTool -ToolName "mq-lsp" -ExePath $mqLspExePath
 
 Write-Host ""
 Write-Host "[INFO] Note: $binDir may remain in PATH if other tools are installed there" -ForegroundColor Cyan

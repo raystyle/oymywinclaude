@@ -8,7 +8,7 @@
 [CmdletBinding()]
 param(
     [Parameter(Position = 0)]
-    [ValidateSet("all", "typescript", "powershell", "astral", "skill-creator", "")]
+    [ValidateSet("all", "typescript", "powershell", "astral", "mq-lsp", "skill-creator", "")]
     [string]$PluginType = "all"
 )
 
@@ -54,6 +54,10 @@ if ($PluginType -eq "all" -or $PluginType -eq "powershell") {
 
 if ($PluginType -eq "all" -or $PluginType -eq "skill-creator") {
     Unregister-Plugin "skill-creator@local-dev"
+}
+
+if ($PluginType -eq "all" -or $PluginType -eq "mq-lsp") {
+    Unregister-Plugin "mq-lsp@local-dev"
 }
 
 # Remove local-dev marketplace (only when uninstalling all or last plugin)

@@ -1,0 +1,23 @@
+{
+  "name": "mq-lsp",
+  "description": "mq language server for query language code intelligence (completion, hover, go-to-definition, diagnostics, formatting)",
+  "version": "1.0.0",
+  "author": {
+    "name": "RAY",
+    "url": "https://github.com/raystyle"
+  },
+  "homepage": "https://github.com/harehare/mq/tree/main/crates/mq-lsp",
+  "repository": "https://github.com/harehare/mq",
+  "license": "MIT",
+  "category": "development",
+  "strict": false,
+  "lspServers": {
+    "mq": {
+      "command": "mq-lsp",
+      "args": [],
+      "extensionToLanguage": {
+        ".mq": "mq"
+      }
+    }
+  }
+}
