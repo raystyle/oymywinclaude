@@ -1,0 +1,30 @@
+{
+  "name": "powershell-lsp",
+  "version": "1.0.0",
+  "description": "PowerShell language server (PowerShell Editor Services) for type checking and code intelligence",
+  "author": {
+    "name": "RAY",
+    "url": "https://github.com/raystyle"
+  },
+  "homepage": "https://github.com/raystyle/oymywinclaude",
+  "repository": "https://github.com/raystyle/oymywinclaude",
+  "license": "MIT",
+  "category": "development",
+  "strict": false,
+  "lspServers": {
+    "powershell": {
+      "command": "pwsh",
+      "args": [
+        "-NoLogo",
+        "-NoProfile",
+        "-Command",
+        "Import-Module PowerShellEditorServices; Start-EditorServices -HostName 'Claude Code' -HostProfileId 'ClaudeCode' -HostVersion '1.0.0' -Stdio -LanguageServiceOnly -LogPath \"$env:TEMP\\pes-claude.log\" -LogLevel Warning"
+      ],
+      "extensionToLanguage": {
+        ".ps1": "powershell",
+        ".psm1": "powershell",
+        ".psd1": "powershell"
+      }
+    }
+  }
+}

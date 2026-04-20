@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "defaultShell": "powershell",
+  "teammateMode": "auto",
+  "autoUpdatesChannel": "stable",
+  "cleanupPeriodDays": 30,
+  "env": {
+    "API_TIMEOUT_MS": "3000000",
+    "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
+    "ENABLE_LSP_TOOL": "1",
+    "CLAUDE_CODE_USE_POWERSHELL_TOOL": "1",
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
+    "CLAUDE_CODE_GIT_BASH_PATH": "D:\\DevEnvs\\Git\\bin\\bash.exe",
+    "PYTHONUTF8": "1",
+    "PYTHONIOENCODING": "utf-8",
+    "LANG": "en_US.UTF-8",
+    "LC_ALL": "en_US.UTF-8",
+    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "glm-4.5-air",
+    "ANTHROPIC_DEFAULT_SONNET_MODEL": "glm-5-turbo",
+    "ANTHROPIC_DEFAULT_OPUS_MODEL": "glm-5.1"
+  },
+  "permissions": {
+    "allow": [
+      "Bash(git *)",
+      "Bash(npm run *)",
+      "Bash(pnpm *)",
+      "Bash(cargo *)",
+      "Bash(rustc *)",
+      "Bash(python *)",
+      "Bash(pip *)",
+      "Bash(node *)",
+      "Bash(npx *)",
+      "Bash(code *)",
+      "Bash(psmux *)",
+      "Bash(tmux *)"
+    ],
+    "deny": [
+      "Read(./.env)",
+      "Read(./.env.*)",
+      "Read(./secrets/**)",
+      "Read(~/.ssh/id_rsa)",
+      "Read(~/.ssh/id_ed25519)",
+      "Read(~/.git-credentials)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python -u ~/.claude/hooks/fix-bash.py"
+          }
+        ]
+      }
+    ]
+  },
+  "enabledPlugins": {
+    "typescript-lsp@local-dev": true,
+    "powershell-lsp@local-dev": true,
+    "astral@local-dev": true
+  }
+}

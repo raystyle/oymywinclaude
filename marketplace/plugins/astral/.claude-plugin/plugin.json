@@ -1,0 +1,34 @@
+{
+  "name": "astral",
+  "description": "Skills for working with Python using Astral tools (uv, ruff, ty)",
+  "version": "0.1.0",
+  "author": {
+    "name": "Astral",
+    "url": "https://github.com/astral-sh"
+  },
+  "homepage": "https://github.com/astral-sh/claude-code-plugins",
+  "repository": "https://github.com/astral-sh/claude-code-plugins",
+  "license": "MIT",
+  "keywords": [
+    "python",
+    "astral",
+    "uv",
+    "ruff",
+    "package-manager",
+    "linter",
+    "formatter",
+    "ty",
+    "type-checker",
+    "lsp"
+  ],
+  "lspServers": {
+    "ty": {
+      "command": "uvx",
+      "args": ["ty@latest", "server"],
+      "extensionToLanguage": {
+        ".py": "python",
+        ".pyi": "python"
+      }
+    }
+  }
+}

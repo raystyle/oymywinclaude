@@ -1,0 +1,59 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "local-dev",
+  "description": "Local development plugins",
+  "owner": {
+    "name": "RAY",
+    "email": "ray@devmeta.local"
+  },
+  "plugins": [
+    {
+      "name": "powershell-lsp",
+      "description": "PowerShell language server (PowerShell Editor Services) for type checking and code intelligence",
+      "version": "1.0.0",
+      "author": {
+        "name": "RAY",
+        "email": "ray@devmeta.local"
+      },
+      "source": "./plugins/powershell-lsp",
+      "category": "development",
+      "strict": false
+    },
+    {
+      "name": "astral",
+      "description": "Skills for working with Python using Astral tools (uv, ruff, ty)",
+      "version": "0.1.0",
+      "author": {
+        "name": "Astral",
+        "url": "https://astral.sh"
+      },
+      "source": "./plugins/astral",
+      "category": "development",
+      "strict": false
+    },
+    {
+      "name": "typescript-lsp",
+      "description": "TypeScript/JavaScript language server for enhanced code intelligence",
+      "version": "1.0.0",
+      "author": {
+        "name": "Anthropic",
+        "email": "support@anthropic.com"
+      },
+      "source": "./plugins/typescript-lsp",
+      "category": "development",
+      "strict": false
+    },
+    {
+      "name": "skill-creator",
+      "description": "Create new skills, modify and improve existing skills, and measure skill performance",
+      "version": "1.0.0",
+      "author": {
+        "name": "Anthropic",
+        "url": "https://github.com/anthropics/skills"
+      },
+      "source": "./plugins/skill-creator",
+      "category": "development",
+      "strict": false
+    }
+  ]
+}

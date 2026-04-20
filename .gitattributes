@@ -1,0 +1,27 @@
+# 自动检测文本文件并标准化为 LF（仓库存储统一用 LF）
+* text=auto
+
+# 所有 Shell 脚本强制使用 LF（关键！）
+*.sh text eol=lf
+
+# 其他常见脚本也一起强制 LF
+*.bash text eol=lf
+*.zsh text eol=lf
+*.fish text eol=lf
+
+# Windows 批处理脚本强制 CRLF
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# PowerShell 脚本通常使用 CRLF（在 Windows 上）
+*.ps1 text eol=crlf
+*.psm1 text eol=crlf
+*.psd1 text eol=crlf
+
+# 项目配置文件通常使用 LF
+*.json text eol=lf
+*.toml text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+*.md text eol=lf
+*.txt text eol=lf
