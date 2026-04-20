@@ -46,14 +46,14 @@ just status-base
 
 | 类别       | 工具                                                |
 | ---------- | --------------------------------------------------- |
-| CLI 工具   | fzf, jq, ripgrep, mq, mq-crawl                      |
+| CLI 工具   | fzf, jq, ripgrep, mq, mq-crawl, markdownlint         |
 | Shell      | PowerShell 7 (pwsh), Nushell                        |
 | Shell 增强 | PSFzf, starship, psmux, CaskaydiaCove Nerd Font     |
 | 编程语言   | Rust, Python + uv, Node.js, Go                      |
 | 数据库     | DuckDB, SQLite                                      |
 | 构建工具   | VS Build Tools (MSVC)                               |
 | 语言服务   | ty (Astral), TypeScript LSP, PowerShell Editor Svc  |
-| 代码分析   | PSScriptAnalyzer, ruff (Astral)                     |
+| 代码分析   | PSScriptAnalyzer, ruff (Astral), markdownlint       |
 | Claude Code | Git, CLI, 插件, MCP, Playwright 技能               |
 | 数据科学   | jupyter-core + jupyter-mcp (via uv)                 |
 | WSL        | Ubuntu 24.04 (distro: ai-linux, `D:\WSL`)          |
@@ -81,6 +81,7 @@ just config-starship        # 重置 starship 提示符配置
 just config-psmux           # 重置 psmux 配置
 just config-alias           # 添加便捷别名（jy = jupyter lab）
 just config-vscode-font     # 配置 VS Code 使用 CaskaydiaCove Nerd Font
+just config-markdownlint    # 部署 markdownlint 用户级配置
 just unblock                # 手动解除安全限制（浏览器下载时）
 
 # 版本锁定
@@ -128,7 +129,7 @@ Playwright 技能 → 插件 → 市场 → Claude CLI → Git。
 
 | 用途        | 路径                                                  |
 | ----------- | ----------------------------------------------------- |
-| 便携式 CLI  | `%USERPROFILE%\.local\bin`                            |
+| 便携式 CLI  | `%USERPROFILE%\.local\bin`（含 npm 工具 shim）       |
 | PowerShell 7 | `%ProgramFiles%\PowerShell\7\`                       |
 | 开发环境    | `D:\DevEnvs\`（Git, Rust, Python, Node.js, Go, VSBT）|
 | 下载缓存    | `D:\DevSetup\`                                        |
