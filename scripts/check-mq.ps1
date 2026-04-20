@@ -2,7 +2,7 @@
 
 <#
 .SYNOPSIS
-    Check mq, mq-crawl and mq-lsp installation status
+    Check mq, mq-crawl, mq-lsp and mq-check installation status
 #>
 
 [CmdletBinding()]
@@ -70,4 +70,5 @@ function Show-ToolStatus {
 
 Show-ToolStatus -ToolName "mq" -ExeName "mq.exe" -NoNewLine
 Show-ToolStatus -ToolName "mq-crawl" -ExeName "mq-crawl.exe" -NoNewLine
-Show-ToolStatus -ToolName "mq-lsp" -ExeName "mq-lsp.exe"
+Show-ToolStatus -ToolName "mq-lsp" -ExeName "mq-lsp.exe" -NoNewLine
+Show-ToolStatus -ToolName "mq-check" -ExeName "mq-check.exe"

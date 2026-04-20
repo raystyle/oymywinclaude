@@ -2,10 +2,11 @@
 
 <#
 .SYNOPSIS
-    Install mq, mq-crawl and mq-lsp from GitHub releases
+    Install mq, mq-crawl, mq-lsp and mq-check from GitHub releases
 .DESCRIPTION
-    Installs mq (query language), mq-crawl (crawler), and mq-lsp
-    (Language Server Protocol) from harehare/mq releases.
+    Installs mq (query language), mq-crawl (crawler), mq-lsp
+    (Language Server Protocol) and mq-check (syntax checker) from
+    harehare/mq releases.
 #>
 
 [CmdletBinding()]
@@ -192,5 +193,8 @@ Install-MQTool -ToolName "mq-crawl" -ExeName "mq-crawl.exe" -ArchiveName "mq-cra
 
 # Install mq-lsp.exe
 Install-MQTool -ToolName "mq-lsp" -ExeName "mq-lsp.exe" -ArchiveName "mq-lsp-x86_64-pc-windows-msvc.exe"
+
+# Install mq-check.exe
+Install-MQTool -ToolName "mq-check" -ExeName "mq-check.exe" -ArchiveName "mq-check-x86_64-pc-windows-msvc.exe"
 
 Write-Host "[OK] MQ tools installation complete" -ForegroundColor Green
