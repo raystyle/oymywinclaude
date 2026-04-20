@@ -271,6 +271,11 @@ install-claude-plugin-skill-creator:
 install-claude-plugin-mqlsp:
     @& "{{scripts}}/install-claude-plugin.ps1" mq-lsp
 
+[doc('Install Nushell LSP plugin for Claude Code')]
+[group('claude-plugin')]
+install-claude-plugin-nushell:
+    @& "{{scripts}}/install-claude-plugin.ps1" nushell
+
 [doc('Register Claude Code plugin by name')]
 [group('claude-plugin')]
 install-claude-plugin *args:
@@ -502,6 +507,11 @@ uninstall-claude-plugin-skill-creator:
 uninstall-claude-plugin-mqlsp:
     @& "{{scripts}}/uninstall-claude-plugin.ps1" mq-lsp
 
+[doc('Unregister Nushell LSP plugin')]
+[group('claude-plugin')]
+uninstall-claude-plugin-nushell:
+    @& "{{scripts}}/uninstall-claude-plugin.ps1" nushell
+
 [doc('Unregister Claude Code plugin by name')]
 [group('claude-plugin')]
 uninstall-claude-plugin *args:
@@ -722,6 +732,11 @@ status-claude-plugin-astral:
 [group('claude-plugin')]
 status-claude-plugin-mqlsp:
     @& "{{scripts}}/check-claude-plugin.ps1" mq-lsp
+
+[doc('Check Nushell LSP plugin status')]
+[group('claude-plugin')]
+status-claude-plugin-nushell:
+    @& "{{scripts}}/check-claude-plugin.ps1" nushell
 
 # =============================================
 #  config

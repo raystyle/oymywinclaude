@@ -66,6 +66,18 @@
       "source": "./plugins/mq-lsp",
       "category": "development",
       "strict": false
+    },
+    {
+      "name": "nushell-lsp",
+      "description": "Nushell language server for code intelligence (completion, hover, go-to-definition, diagnostics)",
+      "version": "1.0.0",
+      "author": {
+        "name": "RAY",
+        "email": "ray@devmeta.local"
+      },
+      "source": "./plugins/nushell-lsp",
+      "category": "development",
+      "strict": false
     }
   ]
 }

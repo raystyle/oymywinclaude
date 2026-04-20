@@ -113,6 +113,7 @@ Playwright 技能 → 插件 → 市场 → Claude CLI → Git。
 | `powershell-lsp@local-dev`  | PowerShell LSP（跳转定义、引用查找、补全等） |
 | `astral@local-dev`          | Python 技能（uv, ruff, ty）+ ty LSP          |
 | `mq-lsp@local-dev`          | mq 语言服务器（补全、悬停、定义跳转等） |
+| `nushell-lsp@local-dev`     | Nushell LSP（`nu --lsp`，补全、悬停、定义跳转等） |
 | `skill-creator@local-dev`   | 技能创建工具（创建、测试和改进 Claude 技能） |
 
 ### MCP 服务

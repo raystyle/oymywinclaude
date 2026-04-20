@@ -1,0 +1,23 @@
+{
+  "name": "nushell-lsp",
+  "description": "Nushell language server for code intelligence (completion, hover, go-to-definition, diagnostics)",
+  "version": "1.0.0",
+  "author": {
+    "name": "RAY",
+    "url": "https://github.com/raystyle"
+  },
+  "homepage": "https://www.nushell.sh",
+  "repository": "https://github.com/nushell/nushell",
+  "license": "MIT",
+  "category": "development",
+  "strict": false,
+  "lspServers": {
+    "nushell": {
+      "command": "nu",
+      "args": ["--lsp"],
+      "extensionToLanguage": {
+        ".nu": "nushell"
+      }
+    }
+  }
+}

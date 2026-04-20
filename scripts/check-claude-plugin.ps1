@@ -8,7 +8,7 @@
 [CmdletBinding()]
 param(
     [Parameter(Position = 0)]
-    [ValidateSet("all", "typescript", "powershell", "astral", "mq-lsp", "skill-creator", "")]
+    [ValidateSet("all", "typescript", "powershell", "astral", "mq-lsp", "nushell", "skill-creator", "")]
     [string]$PluginType = "all"
 )
 
@@ -76,4 +76,8 @@ if ($PluginType -eq "all" -or $PluginType -eq "skill-creator") {
 
 if ($PluginType -eq "all" -or $PluginType -eq "mq-lsp") {
     Show-PluginStatus -Label "mq-lsp" -PluginId "mq-lsp@local-dev" -BinaryCheck "mq-lsp"
+}
+
+if ($PluginType -eq "all" -or $PluginType -eq "nushell") {
+    Show-PluginStatus -Label "Nushell LSP" -PluginId "nushell-lsp@local-dev" -BinaryCheck "nu"
 }
