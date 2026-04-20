@@ -78,6 +78,18 @@
       "source": "./plugins/nushell-lsp",
       "category": "development",
       "strict": false
+    },
+    {
+      "name": "processing-markdown",
+      "description": "Processes Markdown files using mq, a jq-like query language for Markdown (content extraction, transformation, format conversion)",
+      "version": "1.0.0",
+      "author": {
+        "name": "harehare",
+        "url": "https://github.com/harehare"
+      },
+      "source": "./plugins/processing-markdown",
+      "category": "development",
+      "strict": false
     }
   ]
 }

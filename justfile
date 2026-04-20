@@ -276,6 +276,11 @@ install-claude-plugin-mqlsp:
 install-claude-plugin-nushell:
     @& "{{scripts}}/install-claude-plugin.ps1" nushell
 
+[doc('Install Processing Markdown skill for Claude Code')]
+[group('claude-plugin')]
+install-claude-plugin-processing-markdown:
+    @& "{{scripts}}/install-claude-plugin.ps1" processing-markdown
+
 [doc('Register Claude Code plugin by name')]
 [group('claude-plugin')]
 install-claude-plugin *args:
@@ -512,6 +517,11 @@ uninstall-claude-plugin-mqlsp:
 uninstall-claude-plugin-nushell:
     @& "{{scripts}}/uninstall-claude-plugin.ps1" nushell
 
+[doc('Unregister Processing Markdown skill')]
+[group('claude-plugin')]
+uninstall-claude-plugin-processing-markdown:
+    @& "{{scripts}}/uninstall-claude-plugin.ps1" processing-markdown
+
 [doc('Unregister Claude Code plugin by name')]
 [group('claude-plugin')]
 uninstall-claude-plugin *args:
@@ -737,6 +747,11 @@ status-claude-plugin-mqlsp:
 [group('claude-plugin')]
 status-claude-plugin-nushell:
     @& "{{scripts}}/check-claude-plugin.ps1" nushell
+
+[doc('Check Processing Markdown skill status')]
+[group('claude-plugin')]
+status-claude-plugin-processing-markdown:
+    @& "{{scripts}}/check-claude-plugin.ps1" processing-markdown
 
 # =============================================
 #  config
