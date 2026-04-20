@@ -31,7 +31,7 @@ install-base:                                      (install-cli) (install-build)
 
 [doc('Install CLI tools')]
 [group('default')]
-install-cli:                                   (unblock) (install-fzf) (install-jq) (install-ripgrep) (install-starship) (install-psmux) (install-mq) (install-python) (install-node) (install-playwright) (install-font) (install-typescript-lsp)
+install-cli:                                   (unblock) (install-fzf) (install-jq) (install-ripgrep) (install-starship) (install-psmux) (install-mq) (install-python) (install-node) (install-playwright) (install-font) (install-typescript-lsp) (install-markdownlint)
 
 [doc('Install Git for Windows (Portable, D:\\DevEnvs)')]
 [group('claude-cli')]
@@ -166,6 +166,11 @@ install-font:
 [group('cli')]
 install-typescript-lsp:
     @& "{{scripts}}/install-typescript-lsp.ps1"
+
+[doc('Install markdownlint-cli2 (markdownlint via npm + shim)')]
+[group('cli')]
+install-markdownlint:
+    @& "{{scripts}}/install-markdownlint.ps1"
 
 [doc('Install Claude Code CLI (GCS distribution)')]
 [group('claude-cli')]
@@ -303,7 +308,7 @@ uninstall-base:                                   (uninstall-cli) (uninstall-bui
 
 [doc('Uninstall CLI tools')]
 [group('default')]
-uninstall-cli:                                 (uninstall-fzf) (uninstall-jq) (uninstall-ripgrep) (uninstall-starship) (uninstall-psmux) (uninstall-mq) (uninstall-python) (uninstall-node) (uninstall-playwright) (uninstall-font) (uninstall-typescript-lsp)
+uninstall-cli:                                 (uninstall-fzf) (uninstall-jq) (uninstall-ripgrep) (uninstall-starship) (uninstall-psmux) (uninstall-mq) (uninstall-python) (uninstall-node) (uninstall-playwright) (uninstall-font) (uninstall-typescript-lsp) (uninstall-markdownlint)
 
 [doc('Uninstall Git for Windows')]
 [group('claude-cli')]
@@ -407,6 +412,11 @@ uninstall-font:
 uninstall-typescript-lsp:
     @& "{{scripts}}/uninstall-typescript-lsp.ps1"
 
+[doc('Uninstall markdownlint-cli2 (npm + shim)')]
+[group('cli')]
+uninstall-markdownlint:
+    @& "{{scripts}}/uninstall-markdownlint.ps1" -Force
+
 
 [doc('Uninstall default WSL environment')]
 [group('wsl')]
@@ -502,7 +512,7 @@ status-base:                                      (status-cli) (status-build) (s
 
 [doc('Show status of CLI tools')]
 [group('default')]
-status-cli:                                    (status-fzf) (status-jq) (status-ripgrep) (status-starship) (status-psmux) (status-mq) (status-python) (status-node) (status-playwright) (status-font) (status-typescript-lsp)
+status-cli:                                    (status-fzf) (status-jq) (status-ripgrep) (status-starship) (status-psmux) (status-mq) (status-python) (status-node) (status-playwright) (status-font) (status-typescript-lsp) (status-markdownlint)
 
 [doc('Show Git status')]
 [group('claude-cli')]
@@ -607,6 +617,11 @@ status-font:
 status-typescript-lsp:
     @& "{{scripts}}/check-typescript-lsp.ps1"
 
+[doc('Show markdownlint status')]
+[group('cli')]
+status-markdownlint:
+    @& "{{scripts}}/check-markdownlint.ps1"
+
 
 [doc('Show Playwright CLI status')]
 [group('cli')]
@@ -710,6 +725,13 @@ config-psmux:
     @& "{{scripts}}/ensure-config.ps1" \
         -Path "$env:USERPROFILE\.config\psmux\psmux.conf" \
         -TemplatePath "{{templates}}/psmux.conf"
+
+[doc('Deploy markdownlint-cli2 config to user home')]
+[group('config')]
+config-markdownlint:
+    @& "{{scripts}}/ensure-config.ps1" \
+        -Path "$env:USERPROFILE\.markdownlint-cli2.jsonc" \
+        -TemplatePath "{{templates}}/markdownlint-cli2.jsonc"
 
 [doc('Add convenience aliases to PS5 + PS7 profiles (jy = jupyter lab)')]
 [group('config')]

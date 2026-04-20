@@ -11,10 +11,12 @@ param()
 . "$PSScriptRoot\helpers.ps1"
 Refresh-Environment
 
-# ---- 1. Remove shim exe and .shim config ----
-$shimExePath = "$env:USERPROFILE\.local\bin\typescript-language-server.exe"
+# ---- 1. Remove shim exes and .shim configs ----
+$binDir = "$env:USERPROFILE\.local\bin"
 
-Remove-ShimExe -TargetExePath $shimExePath
+Remove-ShimExe -TargetExePath "$binDir\typescript-language-server.exe"
+Remove-ShimExe -TargetExePath "$binDir\tsc.exe"
+Remove-ShimExe -TargetExePath "$binDir\tsserver.exe"
 
 # ---- 2. Uninstall typescript-language-server via npm ----
 $npmCmd = Get-Command npm -ErrorAction SilentlyContinue

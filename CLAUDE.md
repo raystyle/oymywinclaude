@@ -17,7 +17,7 @@ justfile 中命令分 10 组，`just --list` 按组显示：
 | 组            | 用途                                                   |
 | ------------- | ------------------------------------------------------ |
 | `default`     | 聚合命令（install-base, install-cli, install-build 等）|
-| `cli`         | CLI 工具（fzf, jq, ripgrep, starship, psmux, mq 等）  |
+| `cli`         | CLI 工具（fzf, jq, ripgrep, starship, psmux, mq, markdownlint 等）|
 | `claude-cli`  | Git + Claude CLI 安装 + API 密钥配置                  |
 | `claude-plugin` | 插件市场注册 + LSP/技能插件安装                     |
 | `build`       | 构建工具（VS Build Tools, Rust, Go, Jupyter）         |

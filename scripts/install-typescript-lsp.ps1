@@ -47,14 +47,16 @@ else {
 
 Write-Host "[OK] TypeScript LSP installation completed!" -ForegroundColor Green
 
-# ---- 3. Deploy shim exe (node.exe + cli.mjs) ----
-$nodeDir        = "D:\DevEnvs\node"
-$shimExePath    = "$env:USERPROFILE\.local\bin\typescript-language-server.exe"
-$cliMjsPath     = Join-Path $nodeDir "node_modules\typescript-language-server\lib\cli.mjs"
+# ---- 3. Deploy shim exes ----
+$nodeDir = "D:\DevEnvs\node"
 
-if ((Test-Path (Join-Path $nodeDir "node.exe")) -and (Test-Path $cliMjsPath)) {
+# 3a. typescript-language-server (node.exe + cli.mjs)
+$tslsShimPath = "$env:USERPROFILE\.local\bin\typescript-language-server.exe"
+$cliMjsPath   = Join-Path $nodeDir "node_modules\typescript-language-server\lib\cli.mjs"
+
+if ((Test-Path "$nodeDir\node.exe") -and (Test-Path $cliMjsPath)) {
     try {
-        Install-ShimExe -TargetExePath $shimExePath -ShimTargetPath "$nodeDir\node.exe" -ShimArgs "$cliMjsPath"
+        Install-ShimExe -TargetExePath $tslsShimPath -ShimTargetPath "$nodeDir\node.exe" -ShimArgs "$cliMjsPath"
     }
     catch {
         Write-Host "[WARN] Shim deployment failed (non-critical): $_" -ForegroundColor Yellow
@@ -62,4 +64,34 @@ if ((Test-Path (Join-Path $nodeDir "node.exe")) -and (Test-Path $cliMjsPath)) {
 }
 else {
     Write-Host "[WARN] node.exe or cli.mjs not found, skipping shim deployment" -ForegroundColor Yellow
+}
+
+# 3b. tsc (typescript compiler)
+$tscCmdPath = "$nodeDir\tsc.cmd"
+$tscShimPath = "$env:USERPROFILE\.local\bin\tsc.exe"
+if (Test-Path $tscCmdPath) {
+    try {
+        Install-ShimExe -TargetExePath $tscShimPath -ShimTargetPath $tscCmdPath
+    }
+    catch {
+        Write-Host "[WARN] tsc shim deployment failed (non-critical): $_" -ForegroundColor Yellow
+    }
+}
+else {
+    Write-Host "[WARN] tsc.cmd not found, skipping shim deployment" -ForegroundColor Yellow
+}
+
+# 3c. tsserver (typescript language server)
+$tssCmdPath  = "$nodeDir\tsserver.cmd"
+$tssShimPath = "$env:USERPROFILE\.local\bin\tsserver.exe"
+if (Test-Path $tssCmdPath) {
+    try {
+        Install-ShimExe -TargetExePath $tssShimPath -ShimTargetPath $tssCmdPath
+    }
+    catch {
+        Write-Host "[WARN] tsserver shim deployment failed (non-critical): $_" -ForegroundColor Yellow
+    }
+}
+else {
+    Write-Host "[WARN] tsserver.cmd not found, skipping shim deployment" -ForegroundColor Yellow
 }
