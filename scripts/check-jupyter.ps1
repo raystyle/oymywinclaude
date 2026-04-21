@@ -57,20 +57,3 @@ else {
     Write-Host "[WARN] jupyter-core not installed" -ForegroundColor Yellow
     Write-Host "       Run 'just install-jupyter' to install" -ForegroundColor DarkGray
 }
-
-# ---- 3. Check Claude MCP configuration ----
-$claudeCmd = Get-Command claude -ErrorAction SilentlyContinue
-if ($claudeCmd) {
-    try {
-        $mcpListOutput = & claude mcp list 2>&1
-        if ($mcpListOutput -match "jupyter" -and $mcpListOutput -match "127\.0\.0\.1:8888") {
-            Write-Host "  Claude MCP: [OK]" -ForegroundColor Green
-        } else {
-            Write-Host "  Claude MCP: not configured" -ForegroundColor DarkGray
-        }
-    } catch {
-        Write-Host "  Claude MCP: (cannot check)" -ForegroundColor DarkGray
-    }
-} else {
-    Write-Host "  Claude MCP: claude not installed" -ForegroundColor DarkGray
-}

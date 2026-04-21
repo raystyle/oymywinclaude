@@ -6,9 +6,11 @@
 #>
 
 [CmdletBinding()]
-param()
+param(
+    [switch]$Force
+)
 
 . "$PSScriptRoot\helpers.ps1"
 Refresh-Environment
 
-& "$PSScriptRoot\uninstall-tool.ps1" -ExeName "jq.exe"
+& "$PSScriptRoot\uninstall-tool.ps1" -ExeName "jq.exe" -Force:$Force

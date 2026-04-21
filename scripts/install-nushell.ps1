@@ -2,18 +2,14 @@
 
 <#
 .SYNOPSIS
-    Install Nushell and register all bundled plugins
+    Install Nushell from raystyle/nushell-evo GitHub releases
 .DESCRIPTION
-    Downloads Nushell from GitHub Release via install-tool.ps1,
-    moves plugin executables from nested directories, then registers
-    all nu_plugin_*.exe plugins with `nu plugin add`.
+    Downloads Nushell from GitHub, extracts nu.exe and plugins,
+    then registers all nu_plugin_*.exe plugins with `nu plugin add`.
 #>
 
 [CmdletBinding()]
 param(
-    [AllowEmptyString()]
-    [string]$Version = "",
-
     [switch]$Force,
 
     [switch]$NoBackup
@@ -21,77 +17,163 @@ param(
 
 . "$PSScriptRoot\helpers.ps1"
 
-$binDir = "$env:USERPROFILE\.local\bin"
-$nuExe  = "$binDir\nu.exe"
+$binDir  = "$env:USERPROFILE\.local\bin"
+$nuExe   = "$binDir\nu.exe"
+$Repo    = "raystyle/nushell-evo"
+$AssetPattern = '-x86_64-pc-windows-msvc\.zip$'
+$CacheDir = "nushell"
 
-# ---- 1. Install nu.exe via generic installer (subprocess) ----
-$installArgs = @(
-    "-NoProfile",
-    "-File", "$PSScriptRoot\install-tool.ps1",
-    "-Repo", "nushell/nushell",
-    "-ExeName", "nu.exe",
-    "-ArchiveName", "nu-{version}-x86_64-pc-windows-msvc.zip",
-    "-CacheDir", "nushell"
-)
-if ($Version)  { $installArgs += @("-Version", $Version) }
-if ($Force)    { $installArgs += "-Force" }
-if ($NoBackup) { $installArgs += "-NoBackup" }
+# ---- 1. Resolve version & release metadata ----
+Write-Host "[INFO] Fetching latest release for $Repo..." -ForegroundColor Cyan
+try {
+    $release = Get-GitHubRelease -Repo $Repo
+    $rawTag  = $release.tag_name
+    $Version = $rawTag -replace '^v', ''
+    Write-Host "[OK] Latest version: $Version" -ForegroundColor Green
+}
+catch {
+    Write-Host "[WARN] Could not fetch latest version (API rate limit)" -ForegroundColor Yellow
+    if (Test-Path $nuExe) {
+        Write-Host "[INFO] Tool already installed, skipping version check..." -ForegroundColor Cyan
+        Add-UserPath -Dir $binDir
+        exit 0
+    }
+    else {
+        Write-Host "[ERROR] Cannot determine version to install" -ForegroundColor Red
+        exit 1
+    }
+}
 
-Write-Host "[INFO] Installing Nushell..." -ForegroundColor Cyan
-& pwsh @installArgs
-if ($LASTEXITCODE -ne 0) {
-    Write-Host "[ERROR] Nushell installation failed (exit code: $LASTEXITCODE)" -ForegroundColor Red
+# Match the Windows zip asset from the release
+$windowsAsset = $release.assets | Where-Object { $_.name -match $AssetPattern } | Select-Object -First 1
+if (-not $windowsAsset) {
+    Write-Host "[ERROR] No matching Windows asset found in release $rawTag" -ForegroundColor Red
+    Write-Host "       Expected pattern: *$AssetPattern" -ForegroundColor DarkGray
     exit 1
 }
+
+$resolvedArchive = $windowsAsset.name
+$downloadUrl = $windowsAsset.browser_download_url
+Write-Host "[INFO] Target: nu.exe $Version (asset: $resolvedArchive)" -ForegroundColor Cyan
+
+# ---- 2. Idempotent check ----
+if (Test-Path $nuExe) {
+    $raw = & $nuExe --version 2>&1 | Out-String
+    $installed = ''
+    if ($raw -match '(\d+\.\d+\.\d+)') {
+        $installed = $Matches[1]
+    }
+
+    $upgradeCheck = Test-UpgradeRequired -Current $installed -Target $Version -ToolName "nushell" -Force:$Force
+
+    if (-not $upgradeCheck.Required) {
+        Write-Host "[OK] nu.exe $Version already installed, skipping." -ForegroundColor Green
+        Write-Host "[INFO] $($upgradeCheck.Reason)" -ForegroundColor Cyan
+        Add-UserPath -Dir $binDir
+        exit 0
+    }
+
+    if ($installed) {
+        Write-Host "[UPGRADE] $installed -> $Version" -ForegroundColor Cyan
+        Write-Host "     Reason: $($upgradeCheck.Reason)" -ForegroundColor DarkGray
+    }
+
+    if (-not $Force) {
+        Write-Host ""
+        Write-Host "  This will:" -ForegroundColor Cyan
+        Write-Host "    * Backup current version" -ForegroundColor DarkGray
+        Write-Host "    * Install new version" -ForegroundColor DarkGray
+        Write-Host ""
+        $response = Read-Host "  Continue? [Y/n]"
+        if ($response -and $response -ne 'Y' -and $response -ne 'y') {
+            Write-Host "[INFO] Upgrade cancelled by user" -ForegroundColor Cyan
+            exit 0
+        }
+    }
+
+    if (-not $NoBackup) {
+        try {
+            Write-Host "[INFO] Backing up current version..." -ForegroundColor Cyan
+            Backup-ToolVersion -ToolName "nushell" -ExePath $nuExe
+            Write-Host "[OK] Backup complete" -ForegroundColor Green
+        }
+        catch {
+            Write-Host "[WARN] Backup failed: $_" -ForegroundColor Yellow
+        }
+    }
+}
+
+# ---- 3. Download ----
+$zipFile = "$env:TEMP\$resolvedArchive"
+
+Write-Host "[INFO] Downloading $resolvedArchive ..." -ForegroundColor Cyan
+try {
+    Save-WithCache -Url $downloadUrl -OutFile $zipFile -CacheDir $CacheDir
+}
+catch {
+    Write-Host "[ERROR] Failed to download $resolvedArchive" -ForegroundColor Red
+    Write-Host "       URL: $downloadUrl" -ForegroundColor DarkGray
+    exit 1
+}
+
+# ---- 4. Verify SHA256 digest ----
+try {
+    Test-FileHash -FilePath $zipFile -Release $release -AssetName $resolvedArchive | Out-Null
+}
+catch {
+    Write-Host "[ERROR] Hash verification failed: $($_.Exception.Message)" -ForegroundColor Red
+    Remove-Item $zipFile -Force -ErrorAction SilentlyContinue
+    exit 1
+}
+
+# ---- 5. Extract ----
+if (-not (Test-Path $binDir)) {
+    New-Item -ItemType Directory -Path $binDir -Force | Out-Null
+}
+
+$extractDir = Join-Path $env:TEMP "nushell-evo-install"
+if (Test-Path $extractDir) { Remove-Item -Path $extractDir -Recurse -Force }
+
+try {
+    Expand-Archive -Path $zipFile -DestinationPath $extractDir -Force -ErrorAction Stop
+}
+catch {
+    Write-Host "[ERROR] Failed to extract $resolvedArchive" -ForegroundColor Red
+    Remove-Item $zipFile -Force -ErrorAction SilentlyContinue
+    exit 1
+}
+
+# Move nu.exe to binDir
+$extractedExe = Get-ChildItem -Path $extractDir -Filter "nu.exe" -Recurse -File -ErrorAction SilentlyContinue | Select-Object -First 1
+if (-not $extractedExe) {
+    Write-Host "[ERROR] nu.exe not found in archive" -ForegroundColor Red
+    Remove-Item -Path $extractDir -Recurse -Force -ErrorAction SilentlyContinue
+    Remove-Item $zipFile -Force -ErrorAction SilentlyContinue
+    exit 1
+}
+
+Copy-Item -Path $extractedExe.FullName -Destination $nuExe -Force
 
 if (-not (Test-Path $nuExe)) {
-    Write-Host "[ERROR] nu.exe not found after installation" -ForegroundColor Red
+    Write-Host "[ERROR] nu.exe not found after extraction" -ForegroundColor Red
+    Remove-Item -Path $extractDir -Recurse -Force -ErrorAction SilentlyContinue
+    Remove-Item $zipFile -Force -ErrorAction SilentlyContinue
     exit 1
 }
 
-# ---- 2. Move plugin executables from nested directories ----
-$nestedPlugins = Get-ChildItem -Path $binDir -Filter "nu_plugin_*.exe" -Recurse -File -ErrorAction SilentlyContinue |
-    Where-Object { $_.DirectoryName -ne $binDir }
+# ---- 6. PATH ----
+Add-UserPath -Dir $binDir
+Write-Host "[OK] Nushell installed: $nuExe" -ForegroundColor Green
 
-foreach ($plugin in $nestedPlugins) {
+# Move plugin executables from extracted directory
+$pluginExes = Get-ChildItem -Path $extractDir -Filter "nu_plugin_*.exe" -Recurse -File -ErrorAction SilentlyContinue
+foreach ($plugin in $pluginExes) {
     $destPath = Join-Path $binDir $plugin.Name
-    Move-Item -Path $plugin.FullName -Destination $destPath -Force
-    Write-Host "[OK] Moved $($plugin.Name) to $binDir" -ForegroundColor Green
+    Copy-Item -Path $plugin.FullName -Destination $destPath -Force
+    Write-Host "[OK] Copied $($plugin.Name) to $binDir" -ForegroundColor Green
 }
 
-# Clean up empty nested directories created by zip extraction
-Get-ChildItem -Path $binDir -Directory -ErrorAction SilentlyContinue |
-    Where-Object { $_.Name -match "^nu-" } |
-    ForEach-Object {
-        Remove-Item -Path $_.FullName -Recurse -Force -ErrorAction SilentlyContinue
-    }
+# Clean up
+Remove-Item -Path $extractDir -Recurse -Force -ErrorAction SilentlyContinue
+Remove-Item $zipFile -Force -ErrorAction SilentlyContinue
 
-# ---- 3. Register all plugins ----
-$pluginExes = Get-ChildItem -Path $binDir -Filter "nu_plugin_*.exe" -File -ErrorAction SilentlyContinue
-if ($pluginExes.Count -eq 0) {
-    Write-Host "[WARN] No plugin executables found in $binDir" -ForegroundColor Yellow
-    Write-Host "[OK] Nushell installed (no plugins)" -ForegroundColor Green
-    exit 0
-}
-
-Write-Host "[INFO] Registering $($pluginExes.Count) plugin(s)..." -ForegroundColor Cyan
-$registered = 0
-$failed = 0
-
-foreach ($pluginExe in $pluginExes) {
-    $pluginName = $pluginExe.BaseName -replace '^nu_plugin_', ''
-    $pluginPath = $pluginExe.FullName -replace '\\', '/'
-    $output = & $nuExe -c "plugin add '$pluginPath'" 2>&1
-    if ($LASTEXITCODE -eq 0) {
-        Write-Host "[OK] Plugin registered: $pluginName" -ForegroundColor Green
-        $registered++
-    } else {
-        Write-Host "[WARN] Failed to register $pluginName`: $output" -ForegroundColor Yellow
-        $failed++
-    }
-}
-
-Write-Host "[OK] Nushell installed: $registered plugin(s) registered" -ForegroundColor Green
-if ($failed -gt 0) {
-    Write-Host "[WARN] $failed plugin(s) failed to register" -ForegroundColor Yellow
-}

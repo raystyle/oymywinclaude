@@ -80,16 +80,3 @@ if ($unregistered) {
     }
     Write-Host "  Run 'just install-nushell' to register" -ForegroundColor DarkGray
 }
-
-# Claude MCP status
-$settingsPath = "$env:USERPROFILE\.claude.json"
-if ((Test-Path $settingsPath)) {
-    $settings = Get-Content $settingsPath -Raw -ErrorAction SilentlyContinue | ConvertFrom-Json -ErrorAction SilentlyContinue
-    if ($settings.mcpServers.nushell) {
-        Write-Host "  Claude MCP: [OK] nushell" -ForegroundColor Green
-    } else {
-        Write-Host "  Claude MCP: not configured" -ForegroundColor DarkGray
-    }
-} else {
-    Write-Host "  Claude MCP: not configured" -ForegroundColor DarkGray
-}

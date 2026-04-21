@@ -159,7 +159,7 @@ if ($uvxCmd) {
         "plugin not installed"
     }
     $statusColor = if ($pluginStatus -eq "enabled") { "Green" } elseif ($pluginStatus -eq "disabled") { "Yellow" } else { "DarkGray" }
-    Write-Host "    Python LSP (ty): $($uvxCmd.Source)" -ForegroundColor DarkGray
+    Write-Host "    Python LSP (ty): uvx ty@latest server" -ForegroundColor DarkGray
     Write-Host "      Plugin: $pluginStatus" -ForegroundColor $statusColor
 } else {
     Write-Host "    Python LSP (ty): uvx not installed" -ForegroundColor Yellow
@@ -169,7 +169,13 @@ if ($uvxCmd) {
 # TypeScript LSP
 $tscCmd = Get-Command typescript-language-server -ErrorAction SilentlyContinue
 if ($tscCmd) {
-    $pluginStatus = if ($pluginOutput -match "typescript-lsp@claude-plugins-official") {
+    $pluginStatus = if ($pluginOutput -match "typescript-lsp@local-dev") {
+        if ($pluginOutput -match "typescript-lsp@local-dev[\s\S]*?Status.*?enabled") {
+            "enabled"
+        } else {
+            "disabled"
+        }
+    } elseif ($pluginOutput -match "typescript-lsp@claude-plugins-official") {
         if ($pluginOutput -match "typescript-lsp@claude-plugins-official[\s\S]*?Status.*?enabled") {
             "enabled"
         } else {
@@ -187,8 +193,57 @@ if ($tscCmd) {
     Write-Host "      Run 'just install-claude-plugin-typescript' to register plugin" -ForegroundColor DarkGray
 }
 
+# PowerShell LSP (PES)
+$pes = Get-Module -ListAvailable PowerShellEditorServices -ErrorAction SilentlyContinue |
+    Sort-Object Version -Descending | Select-Object -First 1
+if ($pes) {
+    $pluginStatus = if ($pluginOutput -match "powershell-lsp@local-dev") {
+        if ($pluginOutput -match "powershell-lsp@local-dev[\s\S]*?Status.*?enabled") { "enabled" } else { "disabled" }
+    } else { "plugin not installed" }
+    $statusColor = if ($pluginStatus -eq "enabled") { "Green" } elseif ($pluginStatus -eq "disabled") { "Yellow" } else { "DarkGray" }
+    Write-Host "    PowerShell LSP: PowerShellEditorServices $($pes.Version)" -ForegroundColor DarkGray
+    Write-Host "      Plugin: $pluginStatus" -ForegroundColor $statusColor
+} else {
+    Write-Host "    PowerShell LSP: not installed" -ForegroundColor Yellow
+}
+
+# mq LSP
+$mqLspCmd = Get-Command mq-lsp -ErrorAction SilentlyContinue
+if ($mqLspCmd) {
+    $pluginStatus = if ($pluginOutput -match "mq-lsp@local-dev") {
+        if ($pluginOutput -match "mq-lsp@local-dev[\s\S]*?Status.*?enabled") { "enabled" } else { "disabled" }
+    } else { "plugin not installed" }
+    $statusColor = if ($pluginStatus -eq "enabled") { "Green" } elseif ($pluginStatus -eq "disabled") { "Yellow" } else { "DarkGray" }
+    Write-Host "    mq LSP: $($mqLspCmd.Source)" -ForegroundColor DarkGray
+    Write-Host "      Plugin: $pluginStatus" -ForegroundColor $statusColor
+} else {
+    Write-Host "    mq LSP: not installed" -ForegroundColor Yellow
+}
+
+# Nushell LSP
+$nuCmd = Get-Command nu -ErrorAction SilentlyContinue
+if ($nuCmd) {
+    $pluginStatus = if ($pluginOutput -match "nushell-lsp@local-dev") {
+        if ($pluginOutput -match "nushell-lsp@local-dev[\s\S]*?Status.*?enabled") { "enabled" } else { "disabled" }
+    } else { "plugin not installed" }
+    $statusColor = if ($pluginStatus -eq "enabled") { "Green" } elseif ($pluginStatus -eq "disabled") { "Yellow" } else { "DarkGray" }
+    Write-Host "    Nushell LSP: $($nuCmd.Source)" -ForegroundColor DarkGray
+    Write-Host "      Plugin: $pluginStatus" -ForegroundColor $statusColor
+} else {
+    Write-Host "    Nushell LSP: not installed" -ForegroundColor Yellow
+}
+
+# Rust Analyzer LSP
+$rustCmd = Get-Command rust-analyzer -ErrorAction SilentlyContinue
+if ($rustCmd) {
+    $pluginStatus = if ($pluginOutput -match "rust-analyzer-lsp@local-dev") {
+        if ($pluginOutput -match "rust-analyzer-lsp@local-dev[\s\S]*?Status.*?enabled") { "enabled" } else { "disabled" }
+    } else { "plugin not installed" }
+    $statusColor = if ($pluginStatus -eq "enabled") { "Green" } elseif ($pluginStatus -eq "disabled") { "Yellow" } else { "DarkGray" }
+    Write-Host "    Rust Analyzer: $($rustCmd.Source)" -ForegroundColor DarkGray
+    Write-Host "      Plugin: $pluginStatus" -ForegroundColor $statusColor
+} else {
+    Write-Host "    Rust Analyzer: not installed" -ForegroundColor Yellow
+}
+
 Write-Host ""
-Write-Host "For detailed status, run:" -ForegroundColor DarkGray
-Write-Host "  just status-jupyter               # Check Jupyter MCP server" -ForegroundColor DarkGray
-Write-Host "  just status-claude-plugin-astral  # Check Astral (uv, ruff, ty)" -ForegroundColor DarkGray
-Write-Host "  just status-claude-plugin-typescript # Check TypeScript LSP" -ForegroundColor DarkGray

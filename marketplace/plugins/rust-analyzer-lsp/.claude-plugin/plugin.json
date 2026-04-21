@@ -1,0 +1,22 @@
+{
+  "name": "rust-analyzer-lsp",
+  "description": "Rust language server for code intelligence and analysis",
+  "version": "1.0.0",
+  "author": {
+    "name": "RAY",
+    "email": "ray@devmeta.local"
+  },
+  "homepage": "https://rust-analyzer.github.io",
+  "repository": "https://github.com/rust-lang/rust-analyzer",
+  "license": "MIT OR Apache-2.0",
+  "category": "development",
+  "strict": false,
+  "lspServers": {
+    "rust-analyzer": {
+      "command": "rust-analyzer",
+      "extensionToLanguage": {
+        ".rs": "rust"
+      }
+    }
+  }
+}

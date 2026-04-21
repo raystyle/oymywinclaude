@@ -11,7 +11,7 @@
 [CmdletBinding()]
 param(
     [Parameter(Position = 0)]
-    [ValidateSet("all", "typescript", "powershell", "astral", "mq-lsp", "nushell", "processing-markdown", "skill-creator")]
+    [ValidateSet("all", "typescript", "powershell", "astral", "mq-lsp", "nushell", "rust-analyzer")]
     [string]$PluginType = "all"
 )
 
@@ -47,7 +47,7 @@ function Enable-Plugin {
     }
 
     # Try to enable the plugin
-    $enableOutput = & claude plugin enable $PluginId 2>&1
+    & claude plugin enable $PluginId 2>&1 | Out-Null
     if ($LASTEXITCODE -eq 0) {
         Write-Host "[OK] $PluginId : enabled" -ForegroundColor Green
         return $true
@@ -172,28 +172,6 @@ if ($PluginType -eq "all" -or $PluginType -eq "astral") {
     Write-Host ""
 }
 
-# ---- Skill Creator ----
-if ($PluginType -eq "all" -or $PluginType -eq "skill-creator") {
-    Write-Host "[INFO] Skill Creator (skills for creating skills)..." -ForegroundColor Cyan
-
-    # Register local marketplace + plugin
-    $marketplacePath = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot "..\marketplace"))
-    if (-not (Test-Path (Join-Path $marketplacePath ".claude-plugin\marketplace.json"))) {
-        Write-Host "[ERROR] Local marketplace not found: $marketplacePath" -ForegroundColor Red
-    }
-    else {
-        $output = & claude plugin list 2>&1
-        if ($output -notmatch "skill-creator@local-dev") {
-            & claude plugin marketplace add $marketplacePath 2>&1 | Out-Null
-            [void](Register-Plugin "skill-creator@local-dev")
-        }
-        else {
-            Write-Host "[OK] skill-creator@local-dev : already registered" -ForegroundColor Green
-        }
-    }
-    Write-Host ""
-}
-
 # ---- Nushell LSP ----
 if ($PluginType -eq "all" -or $PluginType -eq "nushell") {
     Write-Host "[INFO] Nushell LSP..." -ForegroundColor Cyan
@@ -240,10 +218,10 @@ if ($PluginType -eq "all" -or $PluginType -eq "mq-lsp") {
     Write-Host ""
 }
 
-# ---- Processing Markdown (skill) ----
-if ($PluginType -eq "all" -or $PluginType -eq "processing-markdown") {
-    Write-Host "[INFO] Processing Markdown (mq skill)..." -ForegroundColor Cyan
-    [void](Test-Binary "mq" "mq")
+# ---- Rust Analyzer LSP ----
+if ($PluginType -eq "all" -or $PluginType -eq "rust-analyzer") {
+    Write-Host "[INFO] Rust Analyzer LSP..." -ForegroundColor Cyan
+    [void](Test-Binary "rust-analyzer" "rust-analyzer")
 
     # Register local marketplace + plugin
     $marketplacePath = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot "..\marketplace"))
@@ -252,12 +230,12 @@ if ($PluginType -eq "all" -or $PluginType -eq "processing-markdown") {
     }
     else {
         $output = & claude plugin list 2>&1
-        if ($output -notmatch "processing-markdown@local-dev") {
+        if ($output -notmatch "rust-analyzer-lsp@local-dev") {
             & claude plugin marketplace add $marketplacePath 2>&1 | Out-Null
-            [void](Register-Plugin "processing-markdown@local-dev")
+            [void](Register-Plugin "rust-analyzer-lsp@local-dev")
         }
         else {
-            Write-Host "[OK] processing-markdown@local-dev : already registered" -ForegroundColor Green
+            Write-Host "[OK] rust-analyzer-lsp@local-dev : already registered" -ForegroundColor Green
         }
     }
     Write-Host ""
@@ -270,9 +248,8 @@ $plugins = switch ($PluginType) {
     "astral"       { @("astral@local-dev") }
     "mq-lsp"       { @("mq-lsp@local-dev") }
     "nushell"      { @("nushell-lsp@local-dev") }
-    "processing-markdown" { @("processing-markdown@local-dev") }
-    "skill-creator"{ @("skill-creator@local-dev") }
-    default        { @("typescript-lsp@local-dev", "powershell-lsp@local-dev", "astral@local-dev", "mq-lsp@local-dev", "nushell-lsp@local-dev", "processing-markdown@local-dev", "skill-creator@local-dev") }
+    "rust-analyzer" { @("rust-analyzer-lsp@local-dev") }
+    default        { @("typescript-lsp@local-dev", "powershell-lsp@local-dev", "astral@local-dev", "mq-lsp@local-dev", "nushell-lsp@local-dev", "rust-analyzer-lsp@local-dev") }
 }
 Write-Host "[INFO] Plugin status:" -ForegroundColor Cyan
 $output = & claude plugin list 2>&1

@@ -2,9 +2,10 @@
 
 <#
 .SYNOPSIS
-    Install jupyter-mcp and dependencies via uv tool
+    Install jupyter-core and dependencies via uv tool
 #>
 
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', 'Version', Justification = 'Reserved for future pinning')]
 [CmdletBinding()]
 param(
     [Parameter(Position = 0)]
@@ -22,7 +23,6 @@ $ErrorActionPreference = "Stop"
 # Package versions
 $jupyterlabVersion = "4.4.1"
 $jupyterCollabVersion = "4.0.2"
-$jupyterMcpToolsVersion = "0.1.4"
 $pycrdtVersion = "0.12.17"
 
 # ---- 1. Check uv ----
@@ -36,8 +36,6 @@ $packages = @(
     "jupyter-core",
     "jupyterlab==$jupyterlabVersion",
     "jupyter-collaboration==$jupyterCollabVersion",
-    "jupyter-mcp-tools>=$jupyterMcpToolsVersion",
-    "jupyter-mcp-server",
     "ipykernel",
     "datalayer_pycrdt==$pycrdtVersion"
 )
@@ -61,7 +59,7 @@ if ($alreadyInstalled) {
 }
 
 # ---- 5. Install via uv ----
-Show-Installing -Component "jupyter-mcp"
+Show-Installing -Component "jupyter-core"
 
 $env:UV_NO_PROMPT = "1"
 & uv @uvArgs

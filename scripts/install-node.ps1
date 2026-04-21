@@ -51,7 +51,6 @@ Save-WithCache -Url $DownloadUrl -OutFile $zipFile -CacheDir "node" -TimeoutSec 
 
 # ---- 2. Verify SHA256 (first download only, cache hit uses Save-WithCache's own .sha256) ----
 if (-not $cacheHit) {
-    $majorVer    = ($Version -split '\.')[0]
     $shasumsUrl  = "https://mirrors.ustc.edu.cn/node/v$Version/SHASUMS256.txt"
     $expectedHash = $null
 

@@ -118,7 +118,7 @@ install-psmux:
         -TagPrefix "v" \
         -CacheDir "psmux"
 
-[doc('Install mq - Text editor based on Vim/Neovim')]
+[doc('Install mq - Markdown query language tools')]
 [group('cli')]
 install-mq:
     @& "{{scripts}}/install-mq.ps1"
@@ -187,15 +187,15 @@ setup-claude *args:
 
 [doc('Install all build tools')]
 [group('default')]
-install-build:                                  (create-vsbuildtools-layout) (install-vsbuildtools) (install-rust) (install-jupyter) (install-go)
+install-build:                                  (create-vsbuildtools-layout) (install-vsbuildtools) (install-rust) (install-go)
 
 [doc('Show status of all build tools')]
 [group('default')]
-status-build:                                   (status-vsbuildtools-layout) (status-vsbuildtools) (status-rust) (status-jupyter) (status-go)
+status-build:                                   (status-vsbuildtools-layout) (status-vsbuildtools) (status-rust) (status-go)
 
 [doc('Uninstall all build tools')]
 [group('default')]
-uninstall-build:                                (uninstall-vsbuildtools) (uninstall-rust) (uninstall-jupyter) (uninstall-go)
+uninstall-build:                                (uninstall-vsbuildtools) (uninstall-rust) (uninstall-go)
 
 [doc('Install Claude Code and all plugins')]
 [group('default')]
@@ -206,11 +206,10 @@ install-claude:                                  (install-git) (install-claude-c
 install-claude-marketplace:
     @& "{{scripts}}/install-claude-marketplace.ps1"
 
-[doc('Install jupyter-core + jupyter-mcp via uv tool')]
+[doc('Install jupyter-core via uv tool')]
 [group('build')]
 install-jupyter:
     @& "{{scripts}}/install-jupyter.ps1"
-    @claude mcp add jupyter --scope user --transport http http://127.0.0.1:8888/mcp --header "Authorization: Bearer jupyter" 2>$null
 
 [doc('Install Go (D:\\DevEnvs\\Go)')]
 [group('build')]
@@ -240,11 +239,10 @@ install-sqlite:
 [group('default')]
 install-shell:                                    (install-powershell7) (install-psfzf) (install-powershell-lsp) (install-psscriptanalyzer) (install-nushell)
 
-[doc('Install Nushell + register plugins + configure Claude MCP')]
+[doc('Install Nushell')]
 [group('shell')]
 install-nushell *args:
     @& "{{scripts}}/install-nushell.ps1" {{ args }}
-    -@claude mcp add nushell --transport stdio --scope user -- nu --mcp 2>$null
 
 [doc('Register TypeScript LSP plugin')]
 [group('claude-plugin')]
@@ -261,11 +259,6 @@ install-claude-plugin-powershell:
 install-claude-plugin-astral:
     @& "{{scripts}}/install-claude-plugin.ps1" astral
 
-[doc('Register skill-creator plugin (create, test, and improve skills)')]
-[group('claude-plugin')]
-install-claude-plugin-skill-creator:
-    @& "{{scripts}}/install-claude-plugin.ps1" skill-creator
-
 [doc('Register mq-lsp plugin (mq language server)')]
 [group('claude-plugin')]
 install-claude-plugin-mqlsp:
@@ -276,10 +269,10 @@ install-claude-plugin-mqlsp:
 install-claude-plugin-nushell:
     @& "{{scripts}}/install-claude-plugin.ps1" nushell
 
-[doc('Install Processing Markdown skill for Claude Code')]
+[doc('Register Rust Analyzer LSP plugin (rust-analyzer)')]
 [group('claude-plugin')]
-install-claude-plugin-processing-markdown:
-    @& "{{scripts}}/install-claude-plugin.ps1" processing-markdown
+install-claude-plugin-rust-analyzer:
+    @& "{{scripts}}/install-claude-plugin.ps1" rust-analyzer
 
 [doc('Register Claude Code plugin by name')]
 [group('claude-plugin')]
@@ -456,7 +449,6 @@ uninstall-claude-marketplace:
 [group('build')]
 uninstall-jupyter:
     @& "{{scripts}}/uninstall-jupyter.ps1"
-    @claude mcp remove jupyter --scope user 2>$null
 
 [doc('Uninstall Go')]
 [group('build')]
@@ -481,11 +473,10 @@ uninstall-sqlite:
 [group('default')]
 uninstall-shell:                                  (uninstall-psfzf) (uninstall-powershell7) (uninstall-powershell-lsp) (uninstall-psscriptanalyzer) (uninstall-nushell)
 
-[doc('Uninstall Nushell + remove plugins + Claude MCP')]
+[doc('Uninstall Nushell')]
 [group('shell')]
 uninstall-nushell:
     @& "{{scripts}}/uninstall-nushell.ps1"
-    -@claude mcp remove nushell --scope user 2>$null
 
 [doc('Unregister TypeScript LSP plugin')]
 [group('claude-plugin')]
@@ -502,11 +493,6 @@ uninstall-claude-plugin-powershell:
 uninstall-claude-plugin-astral:
     @& "{{scripts}}/uninstall-claude-plugin.ps1" astral
 
-[doc('Unregister skill-creator plugin')]
-[group('claude-plugin')]
-uninstall-claude-plugin-skill-creator:
-    @& "{{scripts}}/uninstall-claude-plugin.ps1" skill-creator
-
 [doc('Unregister mq-lsp plugin')]
 [group('claude-plugin')]
 uninstall-claude-plugin-mqlsp:
@@ -517,10 +503,10 @@ uninstall-claude-plugin-mqlsp:
 uninstall-claude-plugin-nushell:
     @& "{{scripts}}/uninstall-claude-plugin.ps1" nushell
 
-[doc('Unregister Processing Markdown skill')]
+[doc('Unregister Rust Analyzer LSP plugin')]
 [group('claude-plugin')]
-uninstall-claude-plugin-processing-markdown:
-    @& "{{scripts}}/uninstall-claude-plugin.ps1" processing-markdown
+uninstall-claude-plugin-rust-analyzer:
+    @& "{{scripts}}/uninstall-claude-plugin.ps1" rust-analyzer
 
 [doc('Unregister Claude Code plugin by name')]
 [group('claude-plugin')]
@@ -748,10 +734,10 @@ status-claude-plugin-mqlsp:
 status-claude-plugin-nushell:
     @& "{{scripts}}/check-claude-plugin.ps1" nushell
 
-[doc('Check Processing Markdown skill status')]
+[doc('Check Rust Analyzer LSP plugin status')]
 [group('claude-plugin')]
-status-claude-plugin-processing-markdown:
-    @& "{{scripts}}/check-claude-plugin.ps1" processing-markdown
+status-claude-plugin-rust-analyzer:
+    @& "{{scripts}}/check-claude-plugin.ps1" rust-analyzer
 
 # =============================================
 #  config
@@ -778,16 +764,10 @@ config-markdownlint:
         -Path "$env:USERPROFILE\.markdownlint-cli2.jsonc" \
         -TemplatePath "{{templates}}/markdownlint-cli2.jsonc"
 
-[doc('Add convenience aliases to PS5 + PS7 profiles (jy = jupyter lab)')]
+[doc('Add convenience aliases to PS5 + PS7 profiles')]
 [group('config')]
 config-alias:
-    @& "{{scripts}}/profile-entry.ps1" \
-        -Action add \
-        -BlockName "aliases" \
-        -Line 'function jy { jupyter lab --port 8888 --IdentityProvider.token jupyter --ip 127.0.0.1 }' \
-        -Comment "alias: jy -> jupyter lab"
-    @Write-Host ""
-    @Write-Host "[INFO] Restart PowerShell or run: . `$PROFILE" -ForegroundColor Cyan
+    @Write-Host "[INFO] No aliases configured" -ForegroundColor Cyan
 
 [doc('Configure VS Code to use CaskaydiaCove Nerd Font')]
 [group('config')]

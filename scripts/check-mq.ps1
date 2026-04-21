@@ -5,6 +5,9 @@
     Check mq, mq-crawl, mq-lsp and mq-check installation status
 #>
 
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute(
+    'PSUseUsingScopeModifierInNewRunspaces', '',
+    Justification = 'Variables passed via -ArgumentList param()')]
 [CmdletBinding()]
 param()
 
@@ -16,7 +19,8 @@ function Show-ToolStatus {
     param(
         [string]$ToolName,
         [string]$ExeName,
-        [switch]$NoNewLine
+        [switch]$NoNewLine,
+        [string]$GitHubRepo
     )
 
     $exePath = "$binDir\$ExeName"
@@ -30,28 +34,40 @@ function Show-ToolStatus {
         return
     }
 
-    # Get version
-    try {
-        $job = Start-Job -ScriptBlock {
-            param($exePath)
-            & $exePath "--version"
-        } -ArgumentList $exePath
-
-        $version = Wait-Job $job | Receive-Job
-        Remove-Job $job
-
-        if ($version -match '(\d+\.\d+\.\d+)') {
-            $versionStr = $matches[1]
+    if ($GitHubRepo) {
+        try {
+            $release = Get-GitHubRelease -Repo $GitHubRepo
+            $versionStr = $release.tag_name -replace '^v', ''
         }
-        else {
+        catch {
             $versionStr = "unknown"
         }
+        Write-Host "[OK] $versionStr" -ForegroundColor Green
     }
-    catch {
-        $versionStr = "error"
+    else {
+        try {
+            $job = Start-Job -ScriptBlock {
+                param($exePath)
+                & $exePath "--version"
+            } -ArgumentList $exePath
+
+            $version = (Wait-Job $job | Receive-Job) -join ''
+            Remove-Job $job
+
+            if ($version -match '(\d+\.\d+\.\d+)') {
+                $versionStr = $matches[1]
+            }
+            else {
+                $versionStr = "unknown"
+            }
+        }
+        catch {
+            $versionStr = "error"
+        }
+
+        Write-Host "[OK] $versionStr" -ForegroundColor Green
     }
 
-    Write-Host "[OK] $versionStr" -ForegroundColor Green
     Write-Host "  Location:        $exePath" -ForegroundColor DarkGray
 
     # PATH scope
@@ -71,4 +87,4 @@ function Show-ToolStatus {
 Show-ToolStatus -ToolName "mq" -ExeName "mq.exe" -NoNewLine
 Show-ToolStatus -ToolName "mq-crawl" -ExeName "mq-crawl.exe" -NoNewLine
 Show-ToolStatus -ToolName "mq-lsp" -ExeName "mq-lsp.exe" -NoNewLine
-Show-ToolStatus -ToolName "mq-check" -ExeName "mq-check.exe"
+Show-ToolStatus -ToolName "mq-check" -ExeName "mq-check.exe" -GitHubRepo "harehare/mq" -NoNewLine

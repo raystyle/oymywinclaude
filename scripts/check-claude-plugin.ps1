@@ -8,7 +8,7 @@
 [CmdletBinding()]
 param(
     [Parameter(Position = 0)]
-    [ValidateSet("all", "typescript", "powershell", "astral", "mq-lsp", "nushell", "processing-markdown", "skill-creator", "")]
+    [ValidateSet("all", "typescript", "powershell", "astral", "mq-lsp", "nushell", "rust-analyzer", "")]
     [string]$PluginType = "all"
 )
 
@@ -70,10 +70,6 @@ if ($PluginType -eq "all" -or $PluginType -eq "astral") {
     Show-PluginStatus -Label "Astral (uv, ruff, ty)" -PluginId "astral@local-dev" -BinaryCheck "uvx"
 }
 
-if ($PluginType -eq "all" -or $PluginType -eq "skill-creator") {
-    Show-PluginStatus -Label "Skill Creator" -PluginId "skill-creator@local-dev"
-}
-
 if ($PluginType -eq "all" -or $PluginType -eq "mq-lsp") {
     Show-PluginStatus -Label "mq-lsp" -PluginId "mq-lsp@local-dev" -BinaryCheck "mq-lsp"
 }
@@ -82,6 +78,7 @@ if ($PluginType -eq "all" -or $PluginType -eq "nushell") {
     Show-PluginStatus -Label "Nushell LSP" -PluginId "nushell-lsp@local-dev" -BinaryCheck "nu"
 }
 
-if ($PluginType -eq "all" -or $PluginType -eq "processing-markdown") {
-    Show-PluginStatus -Label "Processing Markdown" -PluginId "processing-markdown@local-dev" -BinaryCheck "mq"
+if ($PluginType -eq "all" -or $PluginType -eq "rust-analyzer") {
+    Show-PluginStatus -Label "Rust Analyzer LSP" -PluginId "rust-analyzer-lsp@local-dev" -BinaryCheck "rust-analyzer"
 }
+

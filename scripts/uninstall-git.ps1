@@ -8,8 +8,11 @@
     removes Git directory with three-tier fallback for locked files.
 #>
 
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', 'Force', Justification = 'Reserved for consistency with uninstall pattern')]
 [CmdletBinding()]
-param()
+param(
+    [switch]$Force
+)
 
 . "$PSScriptRoot\helpers.ps1"
 

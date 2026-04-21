@@ -5,6 +5,8 @@
     Check tool installation status, PATH, and available updates
 #>
 
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', 'Repo', Justification = 'Kept for CLI compatibility')]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', 'TagPrefix', Justification = 'Kept for CLI compatibility')]
 [CmdletBinding()]
 param(
     [Parameter(Mandatory)]

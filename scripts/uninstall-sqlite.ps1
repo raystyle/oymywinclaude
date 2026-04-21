@@ -5,6 +5,7 @@
     Uninstall SQLite CLI tools
 #>
 
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', 'Force', Justification = 'Reserved for consistency with uninstall pattern')]
 [CmdletBinding()]
 param(
     [switch]$Force
@@ -20,6 +21,7 @@ Write-Host ""
 Write-Host "=== Uninstall SQLite ===" -ForegroundColor Cyan
 Write-Host ""
 
+$allRemoved = $true
 foreach ($exe in $allExes) {
     $exePath = Join-Path $binDir $exe
     if (Test-Path $exePath) {
@@ -36,6 +38,7 @@ foreach ($exe in $allExes) {
             else {
                 Write-Host "[WARN] Could not remove $exe : $_" -ForegroundColor Yellow
             }
+            $allRemoved = $false
         }
     }
     else {
@@ -44,6 +47,8 @@ foreach ($exe in $allExes) {
 }
 
 Write-Host ""
-Write-Host "[OK] SQLite uninstalled" -ForegroundColor Green
+if ($allRemoved) {
+    Write-Host "[OK] SQLite uninstalled" -ForegroundColor Green
+}
 Write-Host "     ~/.local/bin and PATH preserved (other tools may use them)" -ForegroundColor DarkGray
 Write-Host ""

@@ -116,8 +116,7 @@ else {
             Sort-Object Version -Descending | Select-Object -First 1
     }
     catch {
-        # Module not installed — this is expected when PSES is not installed
-        # No action needed, will be handled by the null check below
+        Write-Verbose "PowerShellEditorServices not available"
     }
 
     if ($pesModule) {

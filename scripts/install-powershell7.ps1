@@ -9,6 +9,7 @@
     Idempotent -- safe to run multiple times. Supports upgrade detection.
 #>
 
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', 'NoBackup', Justification = 'Reserved for consistency with install-tool.ps1')]
 [CmdletBinding()]
 param(
     [AllowEmptyString()]

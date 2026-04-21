@@ -44,18 +44,6 @@
       "strict": false
     },
     {
-      "name": "skill-creator",
-      "description": "Create new skills, modify and improve existing skills, and measure skill performance",
-      "version": "1.0.0",
-      "author": {
-        "name": "Anthropic",
-        "url": "https://github.com/anthropics/skills"
-      },
-      "source": "./plugins/skill-creator",
-      "category": "development",
-      "strict": false
-    },
-    {
       "name": "mq-lsp",
       "description": "mq language server for query language code intelligence (completion, hover, go-to-definition, diagnostics, formatting)",
       "version": "1.0.0",
@@ -80,14 +68,14 @@
       "strict": false
     },
     {
-      "name": "processing-markdown",
-      "description": "Processes Markdown files using mq, a jq-like query language for Markdown (content extraction, transformation, format conversion)",
+      "name": "rust-analyzer-lsp",
+      "description": "Rust language server for code intelligence and analysis",
       "version": "1.0.0",
       "author": {
-        "name": "harehare",
-        "url": "https://github.com/harehare"
+        "name": "RAY",
+        "email": "ray@devmeta.local"
       },
-      "source": "./plugins/processing-markdown",
+      "source": "./plugins/rust-analyzer-lsp",
       "category": "development",
       "strict": false
     }

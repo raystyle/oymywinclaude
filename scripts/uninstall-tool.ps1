@@ -9,16 +9,20 @@
 param(
     [Parameter(Mandatory)]
     [ValidateNotNullOrEmpty()]
-    [string]$ExeName
+    [string]$ExeName,
+
+    [switch]$Force
 )
 
 $binDir  = "$env:USERPROFILE\.local\bin"
 $exePath = "$binDir\$ExeName"
 
+$removed = $false
 if (Test-Path $exePath) {
     try {
         Remove-Item $exePath -Force -ErrorAction Stop
         Write-Host "[OK] Removed: $exePath" -ForegroundColor Green
+        $removed = $true
     }
     catch {
         $hresult = $_.Exception.HResult
@@ -38,7 +42,10 @@ if (Test-Path $exePath) {
 }
 else {
     Write-Host "[SKIP] $exePath does not exist" -ForegroundColor DarkGray
+    $removed = $true
 }
 
-Write-Host "[OK] $ExeName uninstalled" -ForegroundColor Green
+if ($removed) {
+    Write-Host "[OK] $ExeName uninstalled" -ForegroundColor Green
+}
 Write-Host "     ~/.local/bin and PATH preserved (other tools may use them)" -ForegroundColor DarkGray

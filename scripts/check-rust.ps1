@@ -42,6 +42,15 @@ if (Test-Path $rustup) {
     $toolchains.Trim().Split("`n") | ForEach-Object {
         Write-Host "    $_" -ForegroundColor DarkGray
     }
+
+    # ---- rust-analyzer component ----
+    $raCheck = & $rustup component list --installed 2>&1 | Out-String
+    if ($raCheck -match 'rust-analyzer') {
+        Write-Host "  rust-analyzer:   installed" -ForegroundColor DarkGray
+    }
+    else {
+        Write-Host "  rust-analyzer:   not installed (run: rustup component add rust-analyzer)" -ForegroundColor Yellow
+    }
 }
 else {
     Write-Host "[NOT INSTALLED] rustup" -ForegroundColor Red

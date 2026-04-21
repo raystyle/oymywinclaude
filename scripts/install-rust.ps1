@@ -176,7 +176,17 @@ else {
     Write-Host "[WARN] Failed to set default toolchain, run manually: rustup default stable" -ForegroundColor Yellow
 }
 
-# ---- 10. Verify ----
+# ---- 10. Install rust-analyzer component ----
+Write-Host "[INFO] Installing rust-analyzer component..." -ForegroundColor Cyan
+& "$cargoBin\rustup.exe" component add rust-analyzer 2>&1 | Out-Null
+if ($LASTEXITCODE -eq 0) {
+    Write-Host "[OK] rust-analyzer component installed" -ForegroundColor Green
+}
+else {
+    Write-Host "[WARN] Failed to install rust-analyzer, run manually: rustup component add rust-analyzer" -ForegroundColor Yellow
+}
+
+# ---- 11. Verify ----
 Write-Host "[INFO] Verifying..." -ForegroundColor Cyan
 
 $result = & "$cargoBin\rustc.exe" --version 2>&1 | Out-String

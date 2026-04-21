@@ -9,6 +9,7 @@
     leftover files with three-tier fallback.
 #>
 
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', 'Force', Justification = 'Reserved for consistency with uninstall pattern')]
 [CmdletBinding()]
 param(
     [switch]$Force

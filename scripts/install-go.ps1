@@ -68,15 +68,18 @@ $DownloadUrl = "https://golang.google.cn/dl/$ZipName"
 # ---- 2. Idempotent check ----
 $goExe = "$GoDir\bin\go.exe"
 if (Test-Path $goExe) {
-    $currentVer = (& $goExe version 2>$null | Out-String).Trim()
-    if ($currentVer -eq "go version $latestVersion") {
-        Show-AlreadyInstalled -Tool "Go" -Version $currentVer -Location $GoDir
+    $currentVer = (& $goExe version 2>&1 | Out-String).Trim()
+    if ($currentVer -match "go(\d+\.\d+\.\d+)") {
+        $installedVersion = $matches[1]
+        if ("go$installedVersion" -eq $latestVersion) {
+            Show-AlreadyInstalled -Tool "Go" -Version $currentVer -Location $GoDir
 
-        # Ensure on current PATH
-        if ($env:PATH -notmatch [regex]::Escape("$GoDir\bin")) {
-            $env:PATH = "$GoDir\bin;$env:PATH"
+            # Ensure on current PATH
+            if ($env:PATH -notmatch [regex]::Escape("$GoDir\bin")) {
+                $env:PATH = "$GoDir\bin;$env:PATH"
+            }
+            return
         }
-        return
     }
     Write-Host "[UPGRADE] Go $currentVer -> $latestVersion" -ForegroundColor Cyan
 }
@@ -85,7 +88,7 @@ if (Test-Path $goExe) {
 $zipFile = "$env:TEMP\$ZipName"
 $GoUA = "Go/$latestVersion (Windows; amd64)"
 $cacheDir = "golang"
-$fullCacheDir = Join-Path "D:\DevSetup" $cacheDir
+$fullCacheDir = Join-Path $script:DevSetupRoot $cacheDir
 $cacheFile = Join-Path $fullCacheDir $ZipName
 
 # Ensure cache directory exists
@@ -234,6 +237,6 @@ Write-Host "[OK] GO111MODULE=on" -ForegroundColor Green
 Write-Host "[OK] GOPROXY=https://goproxy.cn" -ForegroundColor Green
 
 # ---- 7. Verify installation ----
-$installedVer = (& "$GoDir\bin\go.exe" version 2>$null | Out-String).Trim()
+$installedVer = (& "$GoDir\bin\go.exe" version 2>&1 | Out-String).Trim()
 Write-Host "[OK] $installedVer" -ForegroundColor Green
 Show-InstallSuccess -Component "Go" -Location $GoDir

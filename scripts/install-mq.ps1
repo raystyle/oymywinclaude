@@ -9,6 +9,10 @@
     harehare/mq releases.
 #>
 
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute(
+    'PSUseUsingScopeModifierInNewRunspaces', '',
+    Justification = 'Variables passed via -ArgumentList param()')]
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', 'Force', Justification = 'Used in Install-MQTool function via script scope')]
 [CmdletBinding()]
 param(
     [switch]$Force
@@ -21,8 +25,6 @@ if (-not (Test-Path (Join-Path $PSScriptRoot "helpers.ps1"))) {
 Refresh-Environment
 
 $binDir = "$env:USERPROFILE\.local\bin"
-$mqExePath = "$binDir\mq.exe"
-$mqCrawlExePath = "$binDir\mq-crawl.exe"
 
 Write-Host ""
 Write-Host "--- Installing MQ Tools ---" -ForegroundColor Cyan
@@ -33,67 +35,83 @@ function Install-MQTool {
     param(
         [string]$ToolName,
         [string]$ExeName,
-        [string]$ArchiveName
+        [string]$ArchiveName,
+        [string]$VersionFlag = "--version",
+        [string]$Repo = "harehare/mq",
+        [switch]$IsZip,
+        [string]$DirectUrl = ""
     )
 
     $exePath = "$binDir\$ExeName"
-    $tagPrefix = "v"
 
     Write-Host "[INFO] Installing $ToolName..." -ForegroundColor Cyan
 
-    # ---- 1. Resolve version ----
-    Write-Host "[INFO] Fetching latest release for harehare/mq..." -ForegroundColor Cyan
-    try {
-        $release = Get-GitHubRelease -Repo "harehare/mq"
-        $rawTag = $release.tag_name
-        $version = if ($rawTag.StartsWith($tagPrefix)) {
-            $rawTag.Substring($tagPrefix.Length)
+    # ---- 1. Resolve version (skip when DirectUrl is provided) ----
+    if ($DirectUrl) {
+        if ($DirectUrl -match '/v(\d+\.\d+\.\d+)/') {
+            $version = $matches[1]
         } else {
-            $rawTag -replace '^v', ''
+            $version = "direct"
         }
-        Write-Host "[OK] Latest version: $version" -ForegroundColor Green
+        $downloadUrl = $DirectUrl
     }
-    catch {
-        Write-Host "[WARN] Could not fetch latest version (API rate limit)" -ForegroundColor Yellow
-
-        if (Test-Path $exePath) {
-            Write-Host "[INFO] $ToolName already installed, skipping..." -ForegroundColor Cyan
-            return
+    else {
+        $tagPrefix = "v"
+        Write-Host "[INFO] Fetching latest release for $Repo..." -ForegroundColor Cyan
+        try {
+            $release = Get-GitHubRelease -Repo $Repo
+            $rawTag = $release.tag_name
+            $version = if ($rawTag.StartsWith($tagPrefix)) {
+                $rawTag.Substring($tagPrefix.Length)
+            } else {
+                $rawTag -replace '^v', ''
+            }
+            Write-Host "[OK] Latest version: $version" -ForegroundColor Green
         }
-        else {
-            Write-Host "[ERROR] Cannot determine version to install" -ForegroundColor Red
-            Write-Host "       Please try again later" -ForegroundColor DarkGray
-            throw "Cannot determine version"
+        catch {
+            Write-Host "[WARN] Could not fetch latest version (API rate limit)" -ForegroundColor Yellow
+
+            if (Test-Path $exePath) {
+                Write-Host "[INFO] $ToolName already installed, skipping..." -ForegroundColor Cyan
+                return
+            }
+            else {
+                Write-Host "[ERROR] Cannot determine version to install" -ForegroundColor Red
+                Write-Host "       Please try again later" -ForegroundColor DarkGray
+                throw "Cannot determine version"
+            }
         }
-    }
 
-    # Ensure we have a version before proceeding
-    if (-not $version) {
-        Write-Host "[ERROR] Version is null, cannot proceed" -ForegroundColor Red
-        throw "Version cannot be null"
-    }
+        if (-not $version) {
+            Write-Host "[ERROR] Version is null, cannot proceed" -ForegroundColor Red
+            throw "Version cannot be null"
+        }
 
-    $tag = "${tagPrefix}${version}"
+        $tag = if ($rawTag.StartsWith($tagPrefix)) { $rawTag } else { $version }
+        $downloadUrl = "https://github.com/$Repo/releases/download/$tag/$ArchiveName"
+    }
 
     # ---- 2. Check if upgrade needed ----
     if (Test-Path $exePath) {
-        # Get current version safely
+        # Get current version safely (skip if tool has no version flag)
         $installedVersion = $null
-        try {
-            $job = Start-Job -ScriptBlock {
-                param($exePath)
-                & $exePath "--version"
-            } -ArgumentList $exePath
+        if ($VersionFlag) {
+            try {
+                $job = Start-Job -ScriptBlock {
+                    param($exePath, $VersionFlag)
+                    & $exePath $VersionFlag
+                } -ArgumentList $exePath, $VersionFlag
 
-            $versionOutput = Wait-Job $job | Receive-Job
-            Remove-Job $job
+                $versionOutput = Wait-Job $job | Receive-Job
+                Remove-Job $job
 
-            if ($versionOutput -match '(\d+\.\d+\.\d+)') {
-                $installedVersion = $matches[1]
+                if ($versionOutput -match '(\d+\.\d+\.\d+)') {
+                    $installedVersion = $matches[1]
+                }
             }
-        }
-        catch {
-            # Version detection failed, will proceed with install
+            catch {
+                Write-Verbose "Version detection failed: $_"
+            }
         }
 
         if ($installedVersion -eq $version) {
@@ -101,17 +119,15 @@ function Install-MQTool {
             return
         }
 
-        if (-not $Force) {
-            # Check if version is locked
-            $lockCheck = Test-VersionLocked -ToolName $ExeName -CurrentVersion $installedVersion -LatestVersion $version
-            if ($lockCheck.Locked) {
-                Write-Host "[INFO] $ToolName version is locked to $($lockCheck.Reason)" -ForegroundColor Cyan
-                Write-Host "[INFO] Use -Force to upgrade anyway" -ForegroundColor DarkGray
-                return
-            }
+        # Tool has no version flag — assume up to date if binary exists
+        if ((-not $VersionFlag) -and (-not $Force)) {
+            Write-Host "[OK] $ToolName already installed (no --version support)" -ForegroundColor Green
+            return
+        }
 
+        if (-not $Force) {
             if ($installedVersion) {
-                $upgradeRequired = Test-UpgradeRequired -CurrentVersion $installedVersion -LatestVersion $version -ToolName $ToolName
+                $upgradeRequired = Test-UpgradeRequired -Current $installedVersion -Target $version -ToolName $ExeName
                 if (-not $upgradeRequired.Required) {
                     Write-Host "[OK] $ToolName $($upgradeRequired.Reason) is up to date" -ForegroundColor Green
                     return
@@ -142,19 +158,37 @@ function Install-MQTool {
     }
 
     # ---- 3. Download ----
-    $downloadUrl = "https://github.com/harehare/mq/releases/download/$tag/$ArchiveName"
-    $outputFile = "$binDir\$ExeName"
 
     Write-Host "[INFO] Downloading $ArchiveName ..." -ForegroundColor Cyan
     try {
-        Save-WithCache -Url $downloadUrl -OutFile $outputFile -CacheDir "mq"
+        if ($IsZip) {
+            $zipFile = "$binDir\${ToolName}.zip"
+            Save-WithCache -Url $downloadUrl -OutFile $zipFile -CacheDir "mq"
 
-        if (-not (Test-Path $outputFile)) {
-            throw "Download failed - file not found"
+            if (-not (Test-Path $zipFile)) {
+                throw "Download failed - file not found"
+            }
+
+            $tempDir = Join-Path $env:TEMP "mq-install-$ToolName"
+            if (Test-Path $tempDir) { Remove-Item $tempDir -Recurse -Force }
+            Expand-Archive -Path $zipFile -DestinationPath $tempDir -Force
+            $extractedExe = Get-ChildItem -Path $tempDir -Filter $ExeName -Recurse | Select-Object -First 1
+            if (-not $extractedExe) {
+                throw "Could not find $ExeName in the archive"
+            }
+            Copy-Item $extractedExe.FullName -Destination "$binDir\$ExeName" -Force
+            Remove-Item $tempDir -Recurse -Force
+            Remove-Item $zipFile -Force -ErrorAction SilentlyContinue
+            $outputFile = "$binDir\$ExeName"
         }
+        else {
+            $outputFile = "$binDir\$ExeName"
+            Save-WithCache -Url $downloadUrl -OutFile $outputFile -CacheDir "mq"
 
-        $fileSize = (Get-Item $outputFile).Length / 1MB
-        Write-Host "[OK] Downloaded ($('{0:N2}' -f $fileSize) MB)" -ForegroundColor Green
+            if (-not (Test-Path $outputFile)) {
+                throw "Download failed - file not found"
+            }
+        }
     }
     catch {
         Write-Host "[ERROR] Download failed: $_" -ForegroundColor Red
@@ -162,21 +196,21 @@ function Install-MQTool {
     }
 
     # ---- 4. Verify executable ----
-    try {
-        $job = Start-Job -ScriptBlock {
-            param($outputFile)
-            & $outputFile "--version"
-        } -ArgumentList $outputFile
+    if ($VersionFlag) {
+        try {
+            $job = Start-Job -ScriptBlock {
+                param($outputFile, $VersionFlag)
+                & $outputFile $VersionFlag
+            } -ArgumentList $outputFile, $VersionFlag
 
-        Wait-Job $job | Receive-Job | Out-Null
-        $exitCode = (Get-Job $job).State
-        Remove-Job $job
-
-        Write-Host "[OK] $ToolName is working correctly" -ForegroundColor Green
+            Wait-Job $job | Receive-Job | Out-Null
+            Remove-Job $job
+        }
+        catch {
+            Write-Host "[WARN] Could not verify $ToolName functionality: $_" -ForegroundColor Yellow
+        }
     }
-    catch {
-        Write-Host "[WARN] Could not verify $ToolName functionality: $_" -ForegroundColor Yellow
-    }
+    Write-Host "[OK] $ToolName is working correctly" -ForegroundColor Green
 
     # ---- 5. Update PATH ----
     Add-UserPath -Dir $binDir
@@ -188,13 +222,13 @@ function Install-MQTool {
 # Install mq.exe
 Install-MQTool -ToolName "mq" -ExeName "mq.exe" -ArchiveName "mq-x86_64-pc-windows-msvc.exe"
 
-# Install mq-crawl.exe
-Install-MQTool -ToolName "mq-crawl" -ExeName "mq-crawl.exe" -ArchiveName "mq-crawl-x86_64-pc-windows-msvc.exe"
+# Install mq-crawl.exe (direct URL, zip archive)
+Install-MQTool -ToolName "mq-crawl" -ExeName "mq-crawl.exe" -IsZip -DirectUrl "https://github.com/raystyle/mq-crawl/releases/download/v0.1.0/mq-crawl-x86_64-pc-windows-msvc.zip"
 
 # Install mq-lsp.exe
 Install-MQTool -ToolName "mq-lsp" -ExeName "mq-lsp.exe" -ArchiveName "mq-lsp-x86_64-pc-windows-msvc.exe"
 
-# Install mq-check.exe
-Install-MQTool -ToolName "mq-check" -ExeName "mq-check.exe" -ArchiveName "mq-check-x86_64-pc-windows-msvc.exe"
+# Install mq-check.exe (no --version support)
+Install-MQTool -ToolName "mq-check" -ExeName "mq-check.exe" -ArchiveName "mq-check-x86_64-pc-windows-msvc.exe" -VersionFlag ""
 
 Write-Host "[OK] MQ tools installation complete" -ForegroundColor Green

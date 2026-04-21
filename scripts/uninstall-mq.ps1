@@ -6,45 +6,20 @@
 #>
 
 [CmdletBinding()]
-param()
+param(
+    [switch]$Force
+)
 
 . "$PSScriptRoot\helpers.ps1"
-
-$binDir = "$env:USERPROFILE\.local\bin"
-$mqExePath = "$binDir\mq.exe"
-$mqCrawlExePath = "$binDir\mq-crawl.exe"
-$mqLspExePath = "$binDir\mq-lsp.exe"
-$mqCheckExePath = "$binDir\mq-check.exe"
+Refresh-Environment
 
 Write-Host ""
 Write-Host "--- Uninstalling MQ Tools ---" -ForegroundColor Cyan
 Write-Host ""
 
-function Remove-MQTool {
-    param(
-        [string]$ToolName,
-        [string]$ExePath
-    )
+& pwsh -NoProfile -File "$PSScriptRoot\uninstall-tool.ps1" -ExeName "mq.exe" -Force:$Force
+& pwsh -NoProfile -File "$PSScriptRoot\uninstall-tool.ps1" -ExeName "mq-crawl.exe" -Force:$Force
+& pwsh -NoProfile -File "$PSScriptRoot\uninstall-tool.ps1" -ExeName "mq-lsp.exe" -Force:$Force
+& pwsh -NoProfile -File "$PSScriptRoot\uninstall-tool.ps1" -ExeName "mq-check.exe" -Force:$Force
 
-    if (Test-Path $ExePath) {
-        try {
-            Remove-Item $ExePath -Force -ErrorAction Stop
-            Write-Host "[OK] $ToolName : uninstalled" -ForegroundColor Green
-        }
-        catch {
-            Write-Host "[ERROR] $ToolName : failed to remove: $_" -ForegroundColor Red
-        }
-    }
-    else {
-        Write-Host "[INFO] $ToolName : not installed" -ForegroundColor Cyan
-    }
-}
-
-Remove-MQTool -ToolName "mq" -ExePath $mqExePath
-Remove-MQTool -ToolName "mq-crawl" -ExePath $mqCrawlExePath
-Remove-MQTool -ToolName "mq-lsp" -ExePath $mqLspExePath
-Remove-MQTool -ToolName "mq-check" -ExePath $mqCheckExePath
-
-Write-Host ""
-Write-Host "[INFO] Note: $binDir may remain in PATH if other tools are installed there" -ForegroundColor Cyan
-Write-Host ""
+Write-Host "[OK] MQ tools uninstalled" -ForegroundColor Green

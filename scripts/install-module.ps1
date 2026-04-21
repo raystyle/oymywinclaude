@@ -16,6 +16,7 @@
     Tag prefix for GitHub releases, e.g. "v"
 #>
 
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', 'TagPrefix', Justification = 'Reserved for consistency with install-tool.ps1')]
 [CmdletBinding()]
 param(
     [Parameter(Mandatory)]

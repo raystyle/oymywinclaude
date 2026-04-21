@@ -66,5 +66,6 @@ PowerShellEditorServices.json
 # Downloads
 downloads/
 *.zip
+*.zip.sha256
 *.exe
 *.msi
