@@ -167,10 +167,25 @@ Write-Host "[OK] Nushell installed: $nuExe" -ForegroundColor Green
 
 # Move plugin executables from extracted directory
 $pluginExes = Get-ChildItem -Path $extractDir -Filter "nu_plugin_*.exe" -Recurse -File -ErrorAction SilentlyContinue
+$registeredPlugins = @(& $nuExe plugin list | ForEach-Object { $_.Trim() } | Where-Object { $_ -match 'nu_plugin_' })
 foreach ($plugin in $pluginExes) {
     $destPath = Join-Path $binDir $plugin.Name
     Copy-Item -Path $plugin.FullName -Destination $destPath -Force
     Write-Host "[OK] Copied $($plugin.Name) to $binDir" -ForegroundColor Green
+
+    if ($registeredPlugins -notcontains $plugin.Name) {
+        $addOutput = & $nuExe plugin add $destPath 2>&1
+        if ($LASTEXITCODE -eq 0) {
+            Write-Host "[OK] Registered plugin: $($plugin.Name)" -ForegroundColor Green
+        }
+        else {
+            Write-Host "[WARN] Failed to register plugin: $($plugin.Name)" -ForegroundColor Yellow
+            Write-Host "       $addOutput" -ForegroundColor DarkGray
+        }
+    }
+    else {
+        Write-Host "[OK] Plugin already registered: $($plugin.Name)" -ForegroundColor Green
+    }
 }
 
 # Clean up
