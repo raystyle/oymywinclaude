@@ -25,13 +25,9 @@ unblock:
     @Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser -Force 2>$null
     @Get-ChildItem -Path (Get-Item ".").FullName -Recurse -File -ErrorAction SilentlyContinue | Unblock-File
 
-[doc('Install all development tools (cli + build + database + shell)')]
+[doc('Install all development tools (cli + database)')]
 [group('default')]
-install-base:                                      (install-cli) (install-build) (install-database) (install-shell)
-
-[doc('Install CLI tools')]
-[group('default')]
-install-cli:                                   (unblock) (install-fzf) (install-jq) (install-ripgrep) (install-starship) (install-psmux) (install-mq) (install-python) (install-node) (install-playwright) (install-font) (install-typescript-lsp) (install-markdownlint)
+install-base:                                      (unblock) (install-fzf) (install-jq) (install-ripgrep) (install-psmux) (install-mq) (install-python) (install-node) (install-playwright) (install-font) (install-typescript-lsp) (install-markdownlint) (install-database)
 
 [doc('Install Git for Windows (Portable, D:\\DevEnvs)')]
 [group('claude-cli')]
@@ -39,7 +35,7 @@ install-git:
     @& "{{scripts}}/install-git.ps1"
 
 [doc('Install fzf')]
-[group('cli')]
+[group('base')]
 install-fzf:
     @& "{{scripts}}/install-tool.ps1" \
         -Repo "junegunn/fzf" \
@@ -49,12 +45,12 @@ install-fzf:
         -CacheDir "fzf"
 
 [doc('Install jq - Command-line JSON processor')]
-[group('cli')]
+[group('base')]
 install-jq:
     @& "{{scripts}}/install-jq.ps1"
 
 [doc('Install ripgrep - Fast text search tool')]
-[group('cli')]
+[group('base')]
 install-ripgrep:
     @& "{{scripts}}/install-tool.ps1" \
         -Repo "BurntSushi/ripgrep" \
@@ -91,7 +87,7 @@ install-psscriptanalyzer:
     @& "{{scripts}}/install-psscriptanalyzer.ps1"
 
 [doc('Install starship prompt')]
-[group('cli')]
+[group('shell')]
 install-starship:
     @& "{{scripts}}/install-tool.ps1" \
         -Repo "starship/starship" \
@@ -109,7 +105,7 @@ install-starship:
         -EditAfter $false
 
 [doc('Install psmux terminal multiplexer')]
-[group('cli')]
+[group('base')]
 install-psmux:
     @& "{{scripts}}/install-tool.ps1" \
         -Repo "psmux/psmux" \
@@ -119,7 +115,7 @@ install-psmux:
         -CacheDir "psmux"
 
 [doc('Install mq - Markdown query language tools')]
-[group('cli')]
+[group('base')]
 install-mq:
     @& "{{scripts}}/install-mq.ps1"
 
@@ -139,23 +135,23 @@ install-rust version="stable":
     @& "{{scripts}}/install-rust.ps1" -Version "{{version}}"
 
 [doc('Install Python + uv (D:\\DevEnvs)')]
-[group('cli')]
+[group('base')]
 install-python version="3.14.4":
     @& "{{scripts}}/install-python.ps1" \
         -PythonVersion "{{version}}"
 
 [doc('Install Node.js (D:\\DevEnvs\\node)')]
-[group('cli')]
+[group('base')]
 install-node version="24.14.1":
     @& "{{scripts}}/install-node.ps1" -Version "{{version}}"
 
 [doc('Install Playwright CLI (@playwright/cli)')]
-[group('cli')]
+[group('base')]
 install-playwright:
     @& "{{scripts}}/install-playwright.ps1"
 
 [doc('Install CaskaydiaCove Nerd Font (Cascadia Code + Nerd Font icons)')]
-[group('cli')]
+[group('base')]
 install-font:
     @& "{{scripts}}/install-font.ps1" \
         -Url "{{cascadia_font_url}}" \
@@ -163,12 +159,12 @@ install-font:
         -FilePattern "{{cascadia_font_pattern}}"
 
 [doc('Install TypeScript LSP for Claude Code')]
-[group('cli')]
+[group('base')]
 install-typescript-lsp:
     @& "{{scripts}}/install-typescript-lsp.ps1"
 
 [doc('Install markdownlint-cli2 (markdownlint via npm + shim)')]
-[group('cli')]
+[group('base')]
 install-markdownlint:
     @& "{{scripts}}/install-markdownlint.ps1"
 
@@ -187,15 +183,15 @@ setup-claude *args:
 
 [doc('Install all build tools')]
 [group('default')]
-install-build:                                  (create-vsbuildtools-layout) (install-vsbuildtools) (install-rust) (install-go)
+install-build:                                  (create-vsbuildtools-layout) (install-vsbuildtools) (install-rust) (install-go) (install-jupyter)
 
 [doc('Show status of all build tools')]
 [group('default')]
-status-build:                                   (status-vsbuildtools-layout) (status-vsbuildtools) (status-rust) (status-go)
+status-build:                                   (status-vsbuildtools-layout) (status-vsbuildtools) (status-rust) (status-go) (status-jupyter)
 
 [doc('Uninstall all build tools')]
 [group('default')]
-uninstall-build:                                (uninstall-vsbuildtools) (uninstall-rust) (uninstall-go)
+uninstall-build:                                (uninstall-vsbuildtools) (uninstall-rust) (uninstall-go) (uninstall-jupyter)
 
 [doc('Install Claude Code and all plugins')]
 [group('default')]
@@ -237,7 +233,7 @@ install-sqlite:
 
 [doc('Install all shell tools')]
 [group('default')]
-install-shell:                                    (install-powershell7) (install-psfzf) (install-powershell-lsp) (install-psscriptanalyzer) (install-nushell)
+install-shell:                                    (install-powershell7) (install-psfzf) (install-powershell-lsp) (install-psscriptanalyzer) (install-starship) (install-nushell)
 
 [doc('Install Nushell')]
 [group('shell')]
@@ -310,13 +306,9 @@ install-wsl:
 #  uninstall
 # =============================================
 
-[doc('Uninstall all development tools (cli + build + database + shell)')]
+[doc('Uninstall all development tools (cli + database)')]
 [group('default')]
-uninstall-base:                                   (uninstall-cli) (uninstall-build) (uninstall-database) (uninstall-shell)
-
-[doc('Uninstall CLI tools')]
-[group('default')]
-uninstall-cli:                                 (uninstall-fzf) (uninstall-jq) (uninstall-ripgrep) (uninstall-starship) (uninstall-psmux) (uninstall-mq) (uninstall-python) (uninstall-node) (uninstall-playwright) (uninstall-font) (uninstall-typescript-lsp) (uninstall-markdownlint)
+uninstall-base:                                   (uninstall-fzf) (uninstall-jq) (uninstall-ripgrep) (uninstall-psmux) (uninstall-mq) (uninstall-python) (uninstall-node) (uninstall-playwright) (uninstall-font) (uninstall-typescript-lsp) (uninstall-markdownlint) (uninstall-database)
 
 [doc('Uninstall Git for Windows')]
 [group('claude-cli')]
@@ -324,17 +316,17 @@ uninstall-git:
     @& "{{scripts}}/uninstall-git.ps1"
 
 [doc('Uninstall fzf')]
-[group('cli')]
+[group('base')]
 uninstall-fzf:
     @& "{{scripts}}/uninstall-tool.ps1" -ExeName "fzf.exe"
 
 [doc('Uninstall jq')]
-[group('cli')]
+[group('base')]
 uninstall-jq:
     @& "{{scripts}}/uninstall-jq.ps1"
 
 [doc('Uninstall ripgrep')]
-[group('cli')]
+[group('base')]
 uninstall-ripgrep:
     @& "{{scripts}}/uninstall-tool.ps1" -ExeName "rg.exe"
 
@@ -363,7 +355,7 @@ uninstall-psscriptanalyzer:
     @& "{{scripts}}/uninstall-psscriptanalyzer.ps1"
 
 [doc('Uninstall starship prompt')]
-[group('cli')]
+[group('shell')]
 uninstall-starship:
     @& "{{scripts}}/profile-entry.ps1" \
         -Action remove \
@@ -372,14 +364,14 @@ uninstall-starship:
     @& "{{scripts}}/uninstall-tool.ps1" -ExeName "starship.exe"
 
 [doc('Uninstall psmux')]
-[group('cli')]
+[group('base')]
 uninstall-psmux:
     @& "{{scripts}}/uninstall-tool.ps1" -ExeName "psmux.exe"
     @& "{{scripts}}/uninstall-tool.ps1" -ExeName "pmux.exe"
     @& "{{scripts}}/uninstall-tool.ps1" -ExeName "tmux.exe"
 
 [doc('Uninstall mq')]
-[group('cli')]
+[group('base')]
 uninstall-mq:
     @& "{{scripts}}/uninstall-mq.ps1" -Force
 
@@ -394,34 +386,34 @@ uninstall-rust:
     @& "{{scripts}}/uninstall-rust.ps1"
 
 [doc('Uninstall Python + uv')]
-[group('cli')]
+[group('base')]
 uninstall-python:
     @& "{{scripts}}/uninstall-python.ps1"
 
 [doc('Uninstall fnm + Node.js')]
-[group('cli')]
+[group('base')]
 uninstall-node:
     @& "{{scripts}}/uninstall-node.ps1"
 
 [doc('Uninstall Playwright CLI')]
-[group('cli')]
+[group('base')]
 uninstall-playwright:
     @& "{{scripts}}/uninstall-playwright.ps1" -Force
 
 [doc('Uninstall CaskaydiaCove Nerd Font')]
-[group('cli')]
+[group('base')]
 uninstall-font:
     @& "{{scripts}}/uninstall-font.ps1" \
         -FontName "{{cascadia_font_name}}" \
         -FilePattern "{{cascadia_font_pattern}}"
 
 [doc('Uninstall TypeScript LSP for Claude Code')]
-[group('cli')]
+[group('base')]
 uninstall-typescript-lsp:
     @& "{{scripts}}/uninstall-typescript-lsp.ps1"
 
 [doc('Uninstall markdownlint-cli2 (npm + shim)')]
-[group('cli')]
+[group('base')]
 uninstall-markdownlint:
     @& "{{scripts}}/uninstall-markdownlint.ps1" -Force
 
@@ -471,7 +463,7 @@ uninstall-sqlite:
 
 [doc('Uninstall all shell tools')]
 [group('default')]
-uninstall-shell:                                  (uninstall-psfzf) (uninstall-powershell7) (uninstall-powershell-lsp) (uninstall-psscriptanalyzer) (uninstall-nushell)
+uninstall-shell:                                  (uninstall-psfzf) (uninstall-powershell7) (uninstall-powershell-lsp) (uninstall-psscriptanalyzer) (uninstall-starship) (uninstall-nushell)
 
 [doc('Uninstall Nushell')]
 [group('shell')]
@@ -522,13 +514,9 @@ uninstall-playwright-skills:
 #  status
 # =============================================
 
-[doc('Show status of all development tools (cli + build + database + shell)')]
+[doc('Show status of all development tools (cli + database)')]
 [group('default')]
-status-base:                                      (status-cli) (status-build) (status-database) (status-shell)
-
-[doc('Show status of CLI tools')]
-[group('default')]
-status-cli:                                    (status-fzf) (status-jq) (status-ripgrep) (status-starship) (status-psmux) (status-mq) (status-python) (status-node) (status-playwright) (status-font) (status-typescript-lsp) (status-markdownlint)
+status-base:                                      (status-fzf) (status-jq) (status-ripgrep) (status-psmux) (status-mq) (status-python) (status-node) (status-playwright) (status-font) (status-typescript-lsp) (status-markdownlint) (status-database)
 
 [doc('Show Git status')]
 [group('claude-cli')]
@@ -536,7 +524,7 @@ status-git:
     @& "{{scripts}}/check-git.ps1"
 
 [doc('Show fzf status')]
-[group('cli')]
+[group('base')]
 status-fzf:
     @& "{{scripts}}/check-tool.ps1" \
         -Repo "junegunn/fzf" \
@@ -544,12 +532,12 @@ status-fzf:
         -TagPrefix "v"
 
 [doc('Show jq status')]
-[group('cli')]
+[group('base')]
 status-jq:
     @& "{{scripts}}/check-jq.ps1"
 
 [doc('Show ripgrep status')]
-[group('cli')]
+[group('base')]
 status-ripgrep:
     @& "{{scripts}}/check-ripgrep.ps1"
 
@@ -574,7 +562,7 @@ status-psscriptanalyzer:
     @& "{{scripts}}/check-psscriptanalyzer.ps1"
 
 [doc('Show starship status')]
-[group('cli')]
+[group('shell')]
 status-starship:
     @& "{{scripts}}/check-tool.ps1" \
         -Repo "starship/starship" \
@@ -584,7 +572,7 @@ status-starship:
         -ProfileLabel "Starship prompt"
 
 [doc('Show psmux status')]
-[group('cli')]
+[group('base')]
 status-psmux:
     @& "{{scripts}}/check-tool.ps1" \
         -Repo "psmux/psmux" \
@@ -592,7 +580,7 @@ status-psmux:
         -TagPrefix "v"
 
 [doc('Show mq status')]
-[group('cli')]
+[group('base')]
 status-mq:
     @& "{{scripts}}/check-mq.ps1"
 
@@ -612,35 +600,35 @@ status-rust:
     @& "{{scripts}}/check-rust.ps1"
 
 [doc('Show Python + uv status')]
-[group('cli')]
+[group('base')]
 status-python:
     @& "{{scripts}}/check-python.ps1"
 
 [doc('Show fnm + Node.js status')]
-[group('cli')]
+[group('base')]
 status-node:
     @& "{{scripts}}/check-node.ps1"
 
 [doc('Show font status')]
-[group('cli')]
+[group('base')]
 status-font:
     @& "{{scripts}}/check-font.ps1" \
         -FontName "{{cascadia_font_name}}" \
         -FilePattern "{{cascadia_font_pattern}}"
 
 [doc('Show TypeScript LSP status')]
-[group('cli')]
+[group('base')]
 status-typescript-lsp:
     @& "{{scripts}}/check-typescript-lsp.ps1"
 
 [doc('Show markdownlint status')]
-[group('cli')]
+[group('base')]
 status-markdownlint:
     @& "{{scripts}}/check-markdownlint.ps1"
 
 
 [doc('Show Playwright CLI status')]
-[group('cli')]
+[group('base')]
 status-playwright:
     @& "{{scripts}}/check-playwright.ps1"
 
@@ -678,7 +666,7 @@ status-sqlite:
 
 [doc('Show status of all shell tools')]
 [group('default')]
-status-shell:                                     (status-powershell7) (status-psfzf) (status-powershell-lsp) (status-psscriptanalyzer) (status-nushell)
+status-shell:                                     (status-powershell7) (status-psfzf) (status-powershell-lsp) (status-psscriptanalyzer) (status-starship) (status-nushell)
 
 [doc('Show Nushell status + registered plugins')]
 [group('shell')]
@@ -790,7 +778,7 @@ test-lint:
 
 [doc('Run all status checks (base + build + claude + wsl)')]
 [group('dev')]
-test-status: (status-cli) (status-build) (status-claude) (status-wsl)
+test-status: (status-base) (status-build) (status-claude) (status-wsl)
 
 [doc('Lock tool version (prevent upgrades)')]
 [group('config')]

@@ -37,6 +37,7 @@ $uvMirror   = "$Mirror/pypi/simple"
 $UserAgent = "Python/$majorMinor (Windows; CPython) urllib/$majorMinor"
 
 # ---- 1. Idempotent check ----
+$skipPythonInstall = $false
 if (Test-Path $pythonExe) {
     $raw = & $pythonExe --version 2>&1 | Out-String
     if ($raw -match '(\d+\.\d+\.\d+)') {
@@ -49,7 +50,7 @@ if (Test-Path $pythonExe) {
                 Show-AlreadyInstalled -Tool "uv"
                 Add-UserPath -Dir $InstallDir
                 Add-UserPath -Dir "$InstallDir\Scripts"
-                exit 0
+                $skipPythonInstall = $true
             }
             else {
                 Write-Host "[INFO] uv not found, will install..." -ForegroundColor Cyan
@@ -61,7 +62,12 @@ if (Test-Path $pythonExe) {
     }
 }
 
-# ---- 2. Check cache ----
+if ($skipPythonInstall) {
+    # Skip to tool installation
+    Write-Host "[INFO] Python and uv already installed, checking ruff and ty..." -ForegroundColor Cyan
+}
+else {
+    # ---- 2. Check cache ----
 $archiveName = "python-$PythonVersion-amd64.zip"
 $targetId    = "pythoncore-$majorMinor-64"
 $hashJsonUrl = "$Mirror/python/$PythonVersion/windows-$PythonVersion.json"
@@ -307,6 +313,8 @@ default = true
     Set-Content -Path $uvConfigFile -Value $uvConfig -Encoding UTF8
     Write-Host "[OK] uv.toml written with USTC mirror" -ForegroundColor Green
 }
+
+} # End of Python/uv installation (skipped if already installed)
 
 # ---- 10. Install ruff and ty via uv ----
 Write-Host "[INFO] Installing ruff and ty via uv..." -ForegroundColor Cyan

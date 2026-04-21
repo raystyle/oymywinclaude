@@ -58,7 +58,33 @@ if ($alreadyInstalled) {
     exit 0
 }
 
-# ---- 5. Install via uv ----
+# ---- 5. Ensure Rust default toolchain (needed by datalayer-pycrdt) ----
+$cargoHome = $env:CARGO_HOME
+if (-not $cargoHome) {
+    $cargoHome = [Environment]::GetEnvironmentVariable("CARGO_HOME", "User")
+}
+if (-not $cargoHome) {
+    $cargoHome = "$env:USERPROFILE\.cargo"
+}
+$rustup = Join-Path $cargoHome "bin\rustup.exe"
+
+if (Test-Path $rustup) {
+    $env:RUSTUP_HOME = if ($env:RUSTUP_HOME) { $env:RUSTUP_HOME } else { [Environment]::GetEnvironmentVariable("RUSTUP_HOME", "User") }
+    $env:CARGO_HOME  = $cargoHome
+    $rustupOutput = & $rustup show 2>&1 | Out-String
+    if ($rustupOutput -match 'no.*toolchain' -or $rustupOutput -match 'no default') {
+        Write-Host "[INFO] Setting Rust default toolchain to stable (required by datalayer-pycrdt)..." -ForegroundColor Cyan
+        & $rustup default stable 2>&1 | Out-Null
+        if ($LASTEXITCODE -eq 0) {
+            Write-Host "[OK] Rust default toolchain set to stable" -ForegroundColor Green
+        }
+        else {
+            Write-Host "[WARN] Failed to set Rust default toolchain" -ForegroundColor Yellow
+        }
+    }
+}
+
+# ---- 6. Install via uv ----
 Show-Installing -Component "jupyter-core"
 
 $env:UV_NO_PROMPT = "1"
@@ -68,7 +94,7 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
-# ---- 6. Verify installation ----
+# ---- 7. Verify installation ----
 $uvList = & uv tool list 2>&1
 if ($uvList -match "jupyter-core") {
     Show-InstallComplete -Tool "jupyter-core"

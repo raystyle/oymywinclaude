@@ -42,7 +42,6 @@ function Show-ToolStatus {
         catch {
             $versionStr = "unknown"
         }
-        Write-Host "[OK] $versionStr" -ForegroundColor Green
     }
     else {
         try {
@@ -64,10 +63,9 @@ function Show-ToolStatus {
         catch {
             $versionStr = "error"
         }
-
-        Write-Host "[OK] $versionStr" -ForegroundColor Green
     }
 
+    Write-Host "[OK] $versionStr" -ForegroundColor Green
     Write-Host "  Location:        $exePath" -ForegroundColor DarkGray
 
     # PATH scope
@@ -85,6 +83,6 @@ function Show-ToolStatus {
 }
 
 Show-ToolStatus -ToolName "mq" -ExeName "mq.exe" -NoNewLine
-Show-ToolStatus -ToolName "mq-crawl" -ExeName "mq-crawl.exe" -NoNewLine
+Show-ToolStatus -ToolName "mq-crawl" -ExeName "mq-crawl.exe" -GitHubRepo "raystyle/mq-crawl" -NoNewLine
 Show-ToolStatus -ToolName "mq-lsp" -ExeName "mq-lsp.exe" -NoNewLine
 Show-ToolStatus -ToolName "mq-check" -ExeName "mq-check.exe" -GitHubRepo "harehare/mq" -NoNewLine

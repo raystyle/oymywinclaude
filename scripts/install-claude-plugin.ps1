@@ -18,7 +18,18 @@ param(
 . "$PSScriptRoot\helpers.ps1"
 Refresh-Environment
 
+$ErrorActionPreference = "Stop"
+
 $env:CLAUDE_CODE_GIT_BASH_PATH = "D:\DevEnvs\Git\bin\bash.exe"
+
+# Verify claude command is available
+$claudeCmd = Get-Command claude -ErrorAction SilentlyContinue
+if (-not $claudeCmd) {
+    Write-Host "[ERROR] Claude Code CLI not found in PATH" -ForegroundColor Red
+    Write-Host "       Please run 'just install-claude' first" -ForegroundColor DarkGray
+    Write-Host "       Or restart your shell and try again" -ForegroundColor DarkGray
+    exit 1
+}
 
 Write-Host ""
 Write-Host "--- Register Claude Code Plugins ---" -ForegroundColor Cyan

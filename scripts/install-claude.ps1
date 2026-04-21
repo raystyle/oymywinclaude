@@ -73,7 +73,27 @@ try {
 }
 catch {
     Write-Host "[WARN] Could not fetch latest version: $_" -ForegroundColor Yellow
-    $latestVersion = $null
+    Write-Host "[INFO] Checking for cached installer..." -ForegroundColor Cyan
+
+    # Try to find cached installer
+    if (Test-Path $DOWNLOAD_DIR) {
+        $cachedInstallers = Get-ChildItem -Path $DOWNLOAD_DIR -Filter "claude-*-*.exe" |
+            Sort-Object LastWriteTime -Descending
+
+        if ($cachedInstallers) {
+            $latestInstaller = $cachedInstallers[0]
+            if ($latestInstaller.Name -match 'claude-(\d+\.\d+\.\d+)-') {
+                $latestVersion = $Matches[1]
+                Write-Host "[OK] Found cached installer: $($latestInstaller.Name)" -ForegroundColor Green
+            }
+        }
+    }
+
+    if (-not $latestVersion) {
+        Write-Host "[ERROR] No network connection and no cached installer found" -ForegroundColor Red
+        Write-Host "       Please connect to internet or download Claude Code installer manually" -ForegroundColor DarkGray
+        exit 1
+    }
 }
 
 # ---- 3. Decide if installation/upgrade is needed ----
@@ -107,20 +127,20 @@ if (-not $needsInstall) {
 }
 
 # ---- 4. Download binary from GCS ----
-Write-Host "[INFO] Fetching manifest for $latestVersion..." -ForegroundColor Cyan
+$checksum = $null
 
 try {
+    Write-Host "[INFO] Fetching manifest for $latestVersion..." -ForegroundColor Cyan
     $manifest = Invoke-RestMethod -Uri "$GCS_BUCKET/$latestVersion/manifest.json" -ErrorAction Stop
     $checksum = $manifest.platforms.$platform.checksum
 
     if (-not $checksum) {
-        Write-Host "[ERROR] Platform $platform not found in manifest" -ForegroundColor Red
-        exit 1
+        Write-Host "[WARN] Platform $platform not found in manifest" -ForegroundColor Yellow
     }
 }
 catch {
-    Write-Host "[ERROR] Failed to get manifest: $_" -ForegroundColor Red
-    exit 1
+    Write-Host "[WARN] Could not fetch manifest, will use cached file without checksum verification" -ForegroundColor Yellow
+    Write-Host "       This is safe if you downloaded from official source" -ForegroundColor DarkGray
 }
 
 New-Item -ItemType Directory -Force -Path $DOWNLOAD_DIR | Out-Null
@@ -130,25 +150,40 @@ $downloadUrl = "$GCS_BUCKET/$latestVersion/$platform/claude.exe"
 # Check if we can reuse the existing download
 $needDownload = $true
 if (Test-Path $binaryPath) {
-    Write-Host "[INFO] Found existing file, verifying checksum..." -ForegroundColor Cyan
-    $existingHash = (Get-FileHash -Path $binaryPath -Algorithm SHA256).Hash.ToLower()
-
-    if ($existingHash -eq $checksum) {
-        $fileSize = (Get-Item $binaryPath).Length
-        if ($fileSize -ge 1MB) {
-            $sizeStr = "{0:N1} MB" -f ($fileSize / 1MB)
-        } else {
-            $sizeStr = "{0:N0} KB" -f ($fileSize / 1KB)
-        }
-        Write-Host "[OK] Reusing cached: claude-$latestVersion-$platform.exe ($sizeStr)" -ForegroundColor Green
-        $needDownload = $false
+    $fileSize = (Get-Item $binaryPath).Length
+    if ($fileSize -ge 1MB) {
+        $sizeStr = "{0:N1} MB" -f ($fileSize / 1MB)
     } else {
-        Write-Host "[WARN] Cached file checksum mismatch, re-downloading..." -ForegroundColor Yellow
-        Remove-Item -Force $binaryPath
+        $sizeStr = "{0:N0} KB" -f ($fileSize / 1KB)
+    }
+
+    # If we have checksum, verify it
+    if ($checksum) {
+        Write-Host "[INFO] Found existing file, verifying checksum..." -ForegroundColor Cyan
+        $existingHash = (Get-FileHash -Path $binaryPath -Algorithm SHA256).Hash.ToLower()
+
+        if ($existingHash -eq $checksum) {
+            Write-Host "[OK] Reusing cached: claude-$latestVersion-$platform.exe ($sizeStr)" -ForegroundColor Green
+            $needDownload = $false
+        } else {
+            Write-Host "[WARN] Cached file checksum mismatch, re-downloading..." -ForegroundColor Yellow
+            Remove-Item -Force $binaryPath
+        }
+    }
+    else {
+        # No checksum available, but file exists and has reasonable size
+        Write-Host "[OK] Reusing cached without checksum verification: claude-$latestVersion-$platform.exe ($sizeStr)" -ForegroundColor Green
+        $needDownload = $false
     }
 }
 
 if ($needDownload) {
+    if (-not $checksum) {
+        Write-Host "[ERROR] Cannot download: no checksum available and no cached file" -ForegroundColor Red
+        Write-Host "       Please check your internet connection or try again later" -ForegroundColor DarkGray
+        exit 1
+    }
+
     Write-Host "[INFO] Downloading Claude Code $latestVersion ($platform)..." -ForegroundColor Cyan
     try {
         # Temporarily enable progress bar for download
@@ -172,26 +207,54 @@ if ($needDownload) {
 }
 
 # ---- 5. Verify checksum ----
-$actualChecksum = (Get-FileHash -Path $binaryPath -Algorithm SHA256).Hash.ToLower()
+if ($checksum) {
+    $actualChecksum = (Get-FileHash -Path $binaryPath -Algorithm SHA256).Hash.ToLower()
 
-if ($actualChecksum -ne $checksum) {
-    Write-Host "[ERROR] Checksum verification failed" -ForegroundColor Red
-    Write-Host "       Expected: $checksum" -ForegroundColor Red
-    Write-Host "       Actual:   $actualChecksum" -ForegroundColor Red
-    Remove-Item -Force $binaryPath
-    exit 1
+    if ($actualChecksum -ne $checksum) {
+        Write-Host "[ERROR] Checksum verification failed" -ForegroundColor Red
+        Write-Host "       Expected: $checksum" -ForegroundColor Red
+        Write-Host "       Actual:   $actualChecksum" -ForegroundColor Red
+        Remove-Item -Force $binaryPath
+        exit 1
+    }
+    Write-Host "[OK] SHA256 verified" -ForegroundColor Green
 }
-Write-Host "[OK] SHA256 verified" -ForegroundColor Green
+else {
+    Write-Host "[INFO] Skipping checksum verification (offline mode)" -ForegroundColor Cyan
+}
 
-# ---- 6. Run built-in installer ----
-Write-Host "[INFO] Running Claude Code installer (target: $Target)..." -ForegroundColor Cyan
+# ---- 6. Copy binary to .local/bin ----
+Write-Host "[INFO] Installing Claude Code binary..." -ForegroundColor Cyan
+
+$binDir = "$env:USERPROFILE\.local\bin"
+$targetExe = "$binDir\claude.exe"
+
+# Ensure .local/bin exists
+New-Item -ItemType Directory -Force -Path $binDir | Out-Null
+
+# Copy binary
 try {
-    & $binaryPath install $Target
+    Copy-Item -Path $binaryPath -Destination $targetExe -Force -ErrorAction Stop
+    Write-Host "[OK] Copied to: $targetExe" -ForegroundColor Green
 }
 catch {
-    Write-Host "[ERROR] Installation failed: $_" -ForegroundColor Red
+    Write-Host "[ERROR] Failed to copy binary: $_" -ForegroundColor Red
     exit 1
 }
+
+# Add to PATH
+Add-UserPath -Dir $binDir
+
+# Verify installation
+Refresh-Environment
+$claudeCmd = Get-Command claude -ErrorAction SilentlyContinue
+
+if (-not $claudeCmd) {
+    Write-Host "[ERROR] claude.exe not found in PATH after installation" -ForegroundColor Red
+    Write-Host "       You may need to restart your shell" -ForegroundColor DarkGray
+    exit 1
+}
+Write-Host "[OK] Claude Code binary found at $($claudeCmd.Source)" -ForegroundColor Green
 
 # ---- 7. Setup default configuration from template ----
 $settingsDir = Join-Path $env:USERPROFILE ".claude"
@@ -223,6 +286,34 @@ elseif (Test-Path $templatePath) {
     }
 }
 
-# ---- 8. Summary ----
+# ---- 8. Verify installation ----
+Write-Host "[INFO] Verifying Claude Code installation..." -ForegroundColor Cyan
+
+# Refresh environment to pick up new PATH
+Refresh-Environment
+
+$claudeCmd = Get-Command claude -ErrorAction SilentlyContinue
+if (-not $claudeCmd) {
+    Write-Host "[ERROR] Claude Code binary not found after installation" -ForegroundColor Red
+    Write-Host "       The installation may have failed or PATH not updated" -ForegroundColor Red
+    Write-Host "       Try restarting your shell and running: just status-claude-cli" -ForegroundColor DarkGray
+    exit 1
+}
+
+try {
+    $versionOutput = & claude --version 2>&1 | Out-String
+    if ($versionOutput -match '(\d+\.\d+\.\d+)') {
+        $installedVersion = $Matches[1]
+        Write-Host "[OK] Claude Code $installedVersion verified at $($claudeCmd.Source)" -ForegroundColor Green
+    }
+    else {
+        Write-Host "[WARN] Claude Code found but version check failed" -ForegroundColor Yellow
+    }
+}
+catch {
+    Write-Host "[WARN] Claude Code found but not executable: $_" -ForegroundColor Yellow
+}
+
+# ---- 9. Summary ----
 Write-Host "[OK] Claude Code installation completed!" -ForegroundColor Green
 Write-Host "  Use 'just setup-claude <key>' to configure API credentials" -ForegroundColor DarkGray

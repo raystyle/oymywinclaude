@@ -54,7 +54,7 @@ if (Test-Path $shimExePath) {
 }
 
 if (Test-Path $shimConfigPath) {
-    Remove-Item -Path $shimConfigPath -Force -Force
+    Remove-Item -Path $shimConfigPath -Force
     Write-Host "[OK] Removed shim config: $shimConfigPath" -ForegroundColor Green
 }
 

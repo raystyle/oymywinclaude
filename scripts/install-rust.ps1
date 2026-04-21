@@ -32,15 +32,28 @@ $rustc    = "$cargoBin\rustc.exe"
 
 # ---- 1. Idempotent check ----
 if ((Test-Path $rustup) -and (Test-Path $rustc)) {
-    # Ensure env vars are set for current session before calling rustc
     $env:RUSTUP_HOME = $RustupHome
     $env:CARGO_HOME  = $CargoHome
     $raw = & $rustc --version 2>&1 | Out-String
     if ($raw -match '(\d+\.\d+\.\d+)') {
         $installed = $Matches[1]
-        Write-Host "[OK] Rust $installed already installed, skipping." -ForegroundColor Green
+        Write-Host "[OK] Rust $installed already installed." -ForegroundColor Green
         Write-Host "[INFO] RUSTUP_HOME: $RustupHome" -ForegroundColor Cyan
         Write-Host "[INFO] CARGO_HOME:  $CargoHome" -ForegroundColor Cyan
+
+        # Ensure default toolchain is set (may be missing after manual/rustup-init install)
+        $showOutput = & $rustup show 2>&1 | Out-String
+        if ($showOutput -match 'no.*toolchain' -or $showOutput -match 'no default') {
+            Write-Host "[INFO] Setting default toolchain to stable..." -ForegroundColor Cyan
+            & $rustup default stable 2>&1 | Out-Null
+            if ($LASTEXITCODE -eq 0) {
+                Write-Host "[OK] Default toolchain set to stable" -ForegroundColor Green
+            }
+            else {
+                Write-Host "[WARN] Failed to set default toolchain, run manually: rustup default stable" -ForegroundColor Yellow
+            }
+        }
+
         Write-Host "[INFO] Run 'rustup update' to update." -ForegroundColor Cyan
         exit 0
     }

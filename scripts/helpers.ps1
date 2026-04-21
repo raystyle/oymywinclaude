@@ -29,7 +29,23 @@ function Refresh-Environment {
     #>
     $machinePath = [Environment]::GetEnvironmentVariable("Path", "Machine")
     $userPath    = [Environment]::GetEnvironmentVariable("Path", "User")
-    $env:Path     = "${machinePath};${userPath}"
+
+    # Merge with deduplication while preserving order (Machine -> User)
+    $pathSet = New-Object System.Collections.Generic.HashSet[string]
+    $mergedPaths = New-Object System.Collections.Generic.List[string]
+
+    foreach ($path in $machinePath -split ';') {
+        if (-not [string]::IsNullOrWhiteSpace($path) -and $pathSet.Add($path)) {
+            $mergedPaths.Add($path)
+        }
+    }
+    foreach ($path in $userPath -split ';') {
+        if (-not [string]::IsNullOrWhiteSpace($path) -and $pathSet.Add($path)) {
+            $mergedPaths.Add($path)
+        }
+    }
+
+    $env:Path = $mergedPaths -join ';'
 }
 
 function Save-WithProxy {

@@ -222,8 +222,8 @@ function Install-MQTool {
 # Install mq.exe
 Install-MQTool -ToolName "mq" -ExeName "mq.exe" -ArchiveName "mq-x86_64-pc-windows-msvc.exe"
 
-# Install mq-crawl.exe (direct URL, zip archive)
-Install-MQTool -ToolName "mq-crawl" -ExeName "mq-crawl.exe" -IsZip -DirectUrl "https://github.com/raystyle/mq-crawl/releases/download/v0.1.0/mq-crawl-x86_64-pc-windows-msvc.zip"
+# Install mq-crawl.exe (zip archive, version from GitHub tags)
+Install-MQTool -ToolName "mq-crawl" -ExeName "mq-crawl.exe" -IsZip -ArchiveName "mq-crawl-x86_64-pc-windows-msvc.zip" -Repo "raystyle/mq-crawl"
 
 # Install mq-lsp.exe
 Install-MQTool -ToolName "mq-lsp" -ExeName "mq-lsp.exe" -ArchiveName "mq-lsp-x86_64-pc-windows-msvc.exe"

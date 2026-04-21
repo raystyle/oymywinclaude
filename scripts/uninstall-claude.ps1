@@ -59,8 +59,8 @@ if ($claudeCmd) {
     }
 }
 
-# ---- 3. Remove configuration files and plugin data ----
-Write-Host "[INFO] Removing configuration files and plugin data..." -ForegroundColor Cyan
+# ---- 3. Remove all .claude contents except downloads/ ----
+Write-Host "[INFO] Removing all .claude directory contents (except downloads/)..." -ForegroundColor Cyan
 
 $removedItems = @()
 $claudeDir = Join-Path $env:USERPROFILE ".claude"
@@ -69,7 +69,9 @@ function Remove-ItemSafe {
     param([string]$Path, [string]$Label, [switch]$Recurse)
     if (Test-Path $Path) {
         try {
-            Remove-Item -Path $Path -Force -ErrorAction Stop @("Recurse:$Recurse")
+            $splat = @{ Path = $Path; Force = $true }
+            if ($Recurse) { $splat.Recurse = $true }
+            Remove-Item @splat -ErrorAction Stop
             $script:removedItems += $Path
             Write-Host "[OK] Removed: $Label" -ForegroundColor Green
         }
@@ -79,18 +81,33 @@ function Remove-ItemSafe {
     }
 }
 
-[void](Remove-ItemSafe -Path (Join-Path $claudeDir "settings.json") -Label "settings.json")
+# Remove .claude.json
 [void](Remove-ItemSafe -Path "$env:USERPROFILE\.claude.json" -Label ".claude.json")
-[void](Remove-ItemSafe -Path (Join-Path $claudeDir "skills") -Label "skills/" -Recurse)
-[void](Remove-ItemSafe -Path (Join-Path $claudeDir "backups") -Label "backups/" -Recurse)
-[void](Remove-ItemSafe -Path (Join-Path $claudeDir "plugins") -Label "plugins/" -Recurse)
+
+# Remove all contents in .claude directory except downloads/
+if (Test-Path $claudeDir) {
+    Write-Host "[INFO] Scanning .claude directory..." -ForegroundColor Cyan
+    $items = Get-ChildItem -Path $claudeDir -Force
+    $skippedItems = @()
+
+    foreach ($item in $items) {
+        if ($item.Name -eq "downloads") {
+            $skippedItems += $item.Name
+            Write-Host "[INFO] Preserving: downloads/" -ForegroundColor Cyan
+            continue
+        }
+
+        $label = if ($item.PSIsContainer) { "$($item.Name)/" } else { $item.Name }
+        [void](Remove-ItemSafe -Path $item.FullName -Label $label -Recurse)
+    }
+}
 
 # ---- 4. Verify ----
 Write-Host ""
-Write-Host "[INFO] Preserving: projects/, memory/" -ForegroundColor Cyan
 if ($removedItems.Count -gt 0) {
     Write-Host "[OK] Claude Code uninstalled successfully!" -ForegroundColor Green
     Write-Host "   Removed $($removedItems.Count) item(s)" -ForegroundColor Cyan
+    Write-Host "   Preserved: downloads/" -ForegroundColor Cyan
 }
 else {
     Write-Host "[INFO] Claude Code uninstalled (no config files found)" -ForegroundColor Cyan
