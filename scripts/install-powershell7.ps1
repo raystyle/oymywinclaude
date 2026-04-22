@@ -21,7 +21,40 @@ param(
 
 . "$PSScriptRoot\helpers.ps1"
 
+# ── Self-elevation (MSI per-machine install requires admin) ──
+$shell = if ($PSVersionTable.PSEdition -eq 'Core') { 'pwsh' } else { 'powershell' }
+$isAdmin = ([Security.Principal.WindowsPrincipal] `
+    [Security.Principal.WindowsIdentity]::GetCurrent()
+).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+
+if (-not $isAdmin) {
+    Write-Host "  [INFO] Elevating to admin..." -ForegroundColor Yellow
+    $logFile = Join-Path $env:TEMP "pwsh7_install.log"
+    Remove-Item $logFile -Force -ErrorAction SilentlyContinue
+
+    $proc = Start-Process $shell -Verb RunAs -ArgumentList @(
+        "-NoLogo", "-NoProfile",
+        "-ExecutionPolicy", "Bypass",
+        "-File", $PSCommandPath
+    ) -Wait -PassThru
+
+    # Relay elevated output
+    if (Test-Path $logFile) {
+        Get-Content $logFile -ErrorAction SilentlyContinue |
+            Where-Object { $_ -notmatch '^\*{10,}$' -and $_ -notmatch '^(PowerShell transcript|Start time|End time|Username|RunAs User|Configuration|Machine:|Host Application|Process ID|PSVersion|PSEdition|GitCommitId|OS:|Platform:|PSCompatible|PSRemoting|Serialization|WSManStack)' }
+        Remove-Item $logFile -Force -ErrorAction SilentlyContinue
+    }
+    exit $proc.ExitCode
+}
+
+# ── Elevated: capture output via transcript ──
+$logFile = Join-Path $env:TEMP "pwsh7_install.log"
+$null = Start-Transcript -Path $logFile -Force
+
+try {
+
 $ErrorActionPreference = 'Stop'
+$script:exitCode = 0
 
 # ---- Constants ----
 $Repo    = "PowerShell/PowerShell"
@@ -69,7 +102,7 @@ if (-not $Version) {
             return
         }
         Write-Host "[ERROR] Cannot determine version to install: $_" -ForegroundColor Red
-        exit 1
+        $script:exitCode = 1; return
     }
 }
 else {
@@ -103,7 +136,7 @@ if ($installed) {
     }
 }
 
-Show-Installing -Tool "PowerShell 7" -Version $Version
+Show-Installing -Component "PowerShell 7 $Version"
 
 # ---- 3. Download MSI ----
 $msiName     = "PowerShell-${Version}-win-x64.msi"
@@ -128,7 +161,7 @@ try {
 }
 catch {
     Write-Host "[ERROR] Failed to download $($msiName): $($_)" -ForegroundColor Red
-    exit 1
+    $script:exitCode = 1; return
 }
 
 # ---- 4. Verify SHA256 ----
@@ -138,7 +171,7 @@ try {
 catch {
     Write-Host "[ERROR] Hash verification failed: $($_.Exception.Message)" -ForegroundColor Red
     Remove-Item $msiFile -Force -ErrorAction SilentlyContinue
-    exit 1
+    $script:exitCode = 1; return
 }
 
 # ---- 5. Run msiexec ----
@@ -169,7 +202,7 @@ if ($proc.ExitCode -eq 0 -or $proc.ExitCode -eq 3010) {
 else {
     Write-Host "[ERROR] msiexec failed with exit code: $($proc.ExitCode)" -ForegroundColor Red
     Write-Host "       MSI rollback is handled by Windows Installer" -ForegroundColor DarkGray
-    exit 1
+    $script:exitCode = 1; return
 }
 
 # ---- 6. Refresh environment and verify ----
@@ -187,7 +220,7 @@ if (-not $pwshCmd) {
     }
     else {
         Write-Host "[ERROR] pwsh.exe not found at expected location" -ForegroundColor Red
-        exit 1
+        $script:exitCode = 1; return
     }
 }
 
@@ -199,9 +232,14 @@ if ($raw -match 'PowerShell\s+(\d+\.\d+\.\d+)') {
 }
 else {
     Write-Host "[ERROR] Verification failed: could not parse version from pwsh --version" -ForegroundColor Red
-    exit 1
+    $script:exitCode = 1; return
 }
 
 # ---- 7. Summary ----
 Write-Host ""
 Show-InstallComplete -Tool "PowerShell 7" -Version $installedVersion
+
+} finally {
+    Stop-Transcript -ErrorAction SilentlyContinue
+    if ($script:exitCode) { exit $script:exitCode }
+}
