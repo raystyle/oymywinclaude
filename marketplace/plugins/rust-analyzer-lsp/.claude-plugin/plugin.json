@@ -4,11 +4,11 @@
   "version": "1.0.0",
   "author": {
     "name": "RAY",
-    "email": "ray@devmeta.local"
+    "url": "https://github.com/raystyle"
   },
   "homepage": "https://rust-analyzer.github.io",
   "repository": "https://github.com/rust-lang/rust-analyzer",
-  "license": "MIT OR Apache-2.0",
+  "license": "MIT",
   "category": "development",
   "strict": false,
   "lspServers": {

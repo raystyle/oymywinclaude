@@ -13,7 +13,7 @@
       "version": "1.0.0",
       "author": {
         "name": "RAY",
-        "email": "ray@devmeta.local"
+        "url": "https://github.com/raystyle"
       },
       "source": "./plugins/powershell-lsp",
       "category": "development",
@@ -49,7 +49,7 @@
       "version": "1.0.0",
       "author": {
         "name": "RAY",
-        "email": "ray@devmeta.local"
+        "url": "https://github.com/raystyle"
       },
       "source": "./plugins/mq-lsp",
       "category": "development",
@@ -61,7 +61,7 @@
       "version": "1.0.0",
       "author": {
         "name": "RAY",
-        "email": "ray@devmeta.local"
+        "url": "https://github.com/raystyle"
       },
       "source": "./plugins/nushell-lsp",
       "category": "development",
@@ -73,7 +73,7 @@
       "version": "1.0.0",
       "author": {
         "name": "RAY",
-        "email": "ray@devmeta.local"
+        "url": "https://github.com/raystyle"
       },
       "source": "./plugins/rust-analyzer-lsp",
       "category": "development",
