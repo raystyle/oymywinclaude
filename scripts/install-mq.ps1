@@ -2,10 +2,10 @@
 
 <#
 .SYNOPSIS
-    Install mq, mq-crawl, mq-lsp and mq-check from GitHub releases
+    Install mq, mq-conv, mq-lsp and mq-check from GitHub releases
 .DESCRIPTION
-    Installs mq (query language), mq-crawl (crawler), mq-lsp
-    (Language Server Protocol) and mq-check (syntax checker) from
+    Installs mq (query language), mq-conv (file format converter),
+    mq-lsp (Language Server Protocol) and mq-check (syntax checker) from
     harehare/mq releases.
 #>
 
@@ -222,8 +222,8 @@ function Install-MQTool {
 # Install mq.exe
 Install-MQTool -ToolName "mq" -ExeName "mq.exe" -ArchiveName "mq-x86_64-pc-windows-msvc.exe"
 
-# Install mq-crawl.exe (zip archive, version from GitHub tags)
-Install-MQTool -ToolName "mq-crawl" -ExeName "mq-crawl.exe" -IsZip -ArchiveName "mq-crawl-x86_64-pc-windows-msvc.zip" -Repo "raystyle/mq-crawl"
+# Install mq-conv.exe
+Install-MQTool -ToolName "mq-conv" -ExeName "mq-conv.exe" -ArchiveName "mq-conv-x86_64-pc-windows-msvc.exe" -Repo "harehare/mq-conv"
 
 # Install mq-lsp.exe
 Install-MQTool -ToolName "mq-lsp" -ExeName "mq-lsp.exe" -ArchiveName "mq-lsp-x86_64-pc-windows-msvc.exe"

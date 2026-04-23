@@ -2,22 +2,14 @@
 
 <#
 .SYNOPSIS
-    Check tool installation status, PATH, and available updates
+    Check tool installation status, PATH, and version
 #>
 
-[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', 'Repo', Justification = 'Kept for CLI compatibility')]
-[Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', 'TagPrefix', Justification = 'Kept for CLI compatibility')]
 [CmdletBinding()]
 param(
     [Parameter(Mandatory)]
-    [ValidatePattern('^[^/]+/[^/]+$')]
-    [string]$Repo,
-
-    [Parameter(Mandatory)]
     [ValidateNotNullOrEmpty()]
     [string]$ExeName,
-
-    [string]$TagPrefix = "",
 
     [string]$ProfileLine = "",
 

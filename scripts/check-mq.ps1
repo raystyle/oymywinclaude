@@ -2,7 +2,7 @@
 
 <#
 .SYNOPSIS
-    Check mq, mq-crawl, mq-lsp and mq-check installation status
+    Check mq, mq-conv, mq-lsp and mq-check installation status
 #>
 
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
@@ -19,8 +19,8 @@ function Show-ToolStatus {
     param(
         [string]$ToolName,
         [string]$ExeName,
-        [switch]$NoNewLine,
-        [string]$GitHubRepo
+        [string]$VersionFlag = "--version",
+        [switch]$NoNewLine
     )
 
     $exePath = "$binDir\$ExeName"
@@ -34,30 +34,19 @@ function Show-ToolStatus {
         return
     }
 
-    if ($GitHubRepo) {
-        try {
-            $release = Get-GitHubRelease -Repo $GitHubRepo
-            $versionStr = $release.tag_name -replace '^v', ''
-        }
-        catch {
-            $versionStr = "unknown"
-        }
-    }
-    else {
+    $versionStr = "unknown"
+    if ($VersionFlag) {
         try {
             $job = Start-Job -ScriptBlock {
-                param($exePath)
-                & $exePath "--version"
-            } -ArgumentList $exePath
+                param($exePath, $VersionFlag)
+                & $exePath $VersionFlag
+            } -ArgumentList $exePath, $VersionFlag
 
             $version = (Wait-Job $job | Receive-Job) -join ''
             Remove-Job $job
 
             if ($version -match '(\d+\.\d+\.\d+)') {
                 $versionStr = $matches[1]
-            }
-            else {
-                $versionStr = "unknown"
             }
         }
         catch {
@@ -83,6 +72,6 @@ function Show-ToolStatus {
 }
 
 Show-ToolStatus -ToolName "mq" -ExeName "mq.exe" -NoNewLine
-Show-ToolStatus -ToolName "mq-crawl" -ExeName "mq-crawl.exe" -GitHubRepo "raystyle/mq-crawl" -NoNewLine
+Show-ToolStatus -ToolName "mq-conv" -ExeName "mq-conv.exe" -NoNewLine
 Show-ToolStatus -ToolName "mq-lsp" -ExeName "mq-lsp.exe" -NoNewLine
-Show-ToolStatus -ToolName "mq-check" -ExeName "mq-check.exe" -GitHubRepo "harehare/mq" -NoNewLine
+Show-ToolStatus -ToolName "mq-check" -ExeName "mq-check.exe" -VersionFlag "" -NoNewLine

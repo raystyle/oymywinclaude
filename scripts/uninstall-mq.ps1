@@ -2,7 +2,7 @@
 
 <#
 .SYNOPSIS
-    Uninstall mq, mq-crawl, mq-lsp and mq-check CLI tools
+    Uninstall mq, mq-conv, mq-lsp and mq-check CLI tools
 #>
 
 [CmdletBinding()]
@@ -18,7 +18,7 @@ Write-Host "--- Uninstalling MQ Tools ---" -ForegroundColor Cyan
 Write-Host ""
 
 & pwsh -NoProfile -File "$PSScriptRoot\uninstall-tool.ps1" -ExeName "mq.exe" -Force:$Force
-& pwsh -NoProfile -File "$PSScriptRoot\uninstall-tool.ps1" -ExeName "mq-crawl.exe" -Force:$Force
+& pwsh -NoProfile -File "$PSScriptRoot\uninstall-tool.ps1" -ExeName "mq-conv.exe" -Force:$Force
 & pwsh -NoProfile -File "$PSScriptRoot\uninstall-tool.ps1" -ExeName "mq-lsp.exe" -Force:$Force
 & pwsh -NoProfile -File "$PSScriptRoot\uninstall-tool.ps1" -ExeName "mq-check.exe" -Force:$Force
 

@@ -45,7 +45,7 @@ just status-base
 
 | 类别       | 工具                                                |
 | ---------- | --------------------------------------------------- |
-| CLI 工具   | fzf, jq, ripgrep, mq, mq-crawl, mq-check, markdownlint |
+| CLI 工具   | fzf, jq, ripgrep, mq, mq-conv, mq-check, markdownlint |
 | Shell      | PowerShell 7 (pwsh), Nushell                        |
 | Shell 增强 | PSFzf, starship, psmux, CaskaydiaCove Nerd Font     |
 | 编程语言   | Rust, Python + uv, Node.js, Go                      |

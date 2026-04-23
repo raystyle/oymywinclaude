@@ -527,9 +527,7 @@ status-git:
 [group('base')]
 status-fzf:
     @& "{{scripts}}/check-tool.ps1" \
-        -Repo "junegunn/fzf" \
-        -ExeName "fzf.exe" \
-        -TagPrefix "v"
+        -ExeName "fzf.exe"
 
 [doc('Show jq status')]
 [group('base')]
@@ -565,9 +563,7 @@ status-psscriptanalyzer:
 [group('shell')]
 status-starship:
     @& "{{scripts}}/check-tool.ps1" \
-        -Repo "starship/starship" \
         -ExeName "starship.exe" \
-        -TagPrefix "v" \
         -ProfileLine "Invoke-Expression (&starship init powershell)" \
         -ProfileLabel "Starship prompt"
 
@@ -575,9 +571,7 @@ status-starship:
 [group('base')]
 status-psmux:
     @& "{{scripts}}/check-tool.ps1" \
-        -Repo "psmux/psmux" \
-        -ExeName "psmux.exe" \
-        -TagPrefix "v"
+        -ExeName "psmux.exe"
 
 [doc('Show mq status')]
 [group('base')]
@@ -655,9 +649,7 @@ status-database:                                  (status-duckdb) (status-sqlite
 [group('database')]
 status-duckdb:
     @& "{{scripts}}/check-tool.ps1" \
-        -Repo "duckdb/duckdb" \
-        -ExeName "duckdb.exe" \
-        -TagPrefix "v"
+        -ExeName "duckdb.exe"
 
 [doc('Show SQLite status')]
 [group('database')]

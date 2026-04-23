@@ -44,21 +44,3 @@ $scope = if ($machinePath -split ';' | ForEach-Object { $_.TrimEnd('\') } | Wher
 if ($scope) { Write-Host "  PATH:            $scope" -ForegroundColor DarkGray }
 else { Write-Host "  PATH:            not configured" -ForegroundColor Yellow }
 
-# ---- 3. Check for updates ----
-try {
-    $release = Get-GitHubRelease -Repo "PowerShell/PowerShell"
-    $latestTag = $release.tag_name -replace '^v', ''
-    $comparison = Compare-SemanticVersion -Current $current -Latest $latestTag
-    if ($comparison -eq -1) {
-        Write-Host "  Update available: $current -> $latestTag" -ForegroundColor Yellow
-    }
-    elseif ($comparison -eq 0) {
-        Write-Host "  Latest:          $latestTag (up to date)" -ForegroundColor DarkGray
-    }
-    else {
-        Write-Host "  Latest:          $latestTag (installed is newer)" -ForegroundColor DarkGray
-    }
-}
-catch {
-    Write-Host "  Update check:    unavailable ($($_.Exception.Message))" -ForegroundColor DarkGray
-}
