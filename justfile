@@ -214,7 +214,7 @@ install-go:
 
 [doc('Install all database tools')]
 [group('default')]
-install-database:                                  (install-duckdb) (install-sqlite)
+install-database:                                  (install-duckdb) (install-sqlite) (install-duckdb-extension)
 
 [doc('Install DuckDB CLI')]
 [group('database')]
@@ -230,6 +230,11 @@ install-duckdb:
 [group('database')]
 install-sqlite:
     @& "{{scripts}}/install-sqlite.ps1"
+
+[doc('Install DuckDB extensions (shellfs, httpfs)')]
+[group('database')]
+install-duckdb-extension *args:
+    @& "{{scripts}}/install-duckdb-extension.ps1" {{args}}
 
 [doc('Install all shell tools')]
 [group('default')]
@@ -449,7 +454,7 @@ uninstall-go:
 
 [doc('Uninstall all database tools')]
 [group('default')]
-uninstall-database:                                (uninstall-duckdb) (uninstall-sqlite)
+uninstall-database:                                (uninstall-duckdb) (uninstall-sqlite) (uninstall-duckdb-extension)
 
 [doc('Uninstall DuckDB CLI')]
 [group('database')]
@@ -460,6 +465,11 @@ uninstall-duckdb:
 [group('database')]
 uninstall-sqlite:
     @& "{{scripts}}/uninstall-sqlite.ps1"
+
+[doc('Uninstall DuckDB community extensions')]
+[group('database')]
+uninstall-duckdb-extension *args:
+    @& "{{scripts}}/uninstall-duckdb-extension.ps1" {{args}}
 
 [doc('Uninstall all shell tools')]
 [group('default')]
@@ -643,7 +653,7 @@ status-go:
 
 [doc('Show status of all database tools')]
 [group('default')]
-status-database:                                  (status-duckdb) (status-sqlite)
+status-database:                                  (status-duckdb) (status-sqlite) (status-duckdb-extension)
 
 [doc('Show DuckDB status')]
 [group('database')]
@@ -655,6 +665,11 @@ status-duckdb:
 [group('database')]
 status-sqlite:
     @& "{{scripts}}/check-sqlite.ps1"
+
+[doc('Show DuckDB extensions status')]
+[group('database')]
+status-duckdb-extension:
+    @& "{{scripts}}/check-duckdb-extension.ps1"
 
 [doc('Show status of all shell tools')]
 [group('default')]
